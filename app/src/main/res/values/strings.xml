@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">MovieBrowser</string>
+    <string name="overview">Overview</string>
+    <string name="rating">Rating</string>
+    <string name="retry">Retry</string>
+    <string name="oss_licenses">Open Source Licenses</string>
+    <string name="data_from">Data from themoviedb.org</string>
+</resources>

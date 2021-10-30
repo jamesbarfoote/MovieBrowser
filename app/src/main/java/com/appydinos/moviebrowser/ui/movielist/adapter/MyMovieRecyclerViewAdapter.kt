@@ -1,0 +1,46 @@
+package com.appydinos.moviebrowser.ui.movielist.adapter
+
+import androidx.recyclerview.widget.RecyclerView
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import com.appydinos.moviebrowser.data.model.Movie
+import com.appydinos.moviebrowser.databinding.MovieItemBinding
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade
+
+/**
+ * [RecyclerView.Adapter] that can display a [Movie].
+ */
+class MyMovieRecyclerViewAdapter(
+    binding: MovieItemBinding,
+    private var onSelect: (Movie) -> Unit
+) : RecyclerView.ViewHolder(binding.root) {
+    private val title = binding.movieTitle
+    private val description = binding.movieDescription
+    private val card = binding.movieCard
+    private val image = binding.moviePoster
+
+    companion object {
+        fun create(parent: ViewGroup, onSelect: (Movie) -> Unit): MyMovieRecyclerViewAdapter {
+            val view = MovieItemBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false
+            )
+            return MyMovieRecyclerViewAdapter(view, onSelect)
+        }
+    }
+
+    fun bind(movie: Movie) {
+        Glide.with(image)
+            .load(movie.posterURL)
+            .transition(withCrossFade())
+            .into(image)
+
+        title.text = movie.title
+        description.text = movie.description
+        card.setOnClickListener {
+            onSelect(movie)
+        }
+    }
+}
