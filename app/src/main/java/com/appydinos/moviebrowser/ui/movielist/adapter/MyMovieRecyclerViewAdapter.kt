@@ -1,8 +1,9 @@
 package com.appydinos.moviebrowser.ui.movielist.adapter
 
-import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.RecyclerView
 import com.appydinos.moviebrowser.data.model.Movie
 import com.appydinos.moviebrowser.databinding.MovieItemBinding
 import com.bumptech.glide.Glide
@@ -19,6 +20,7 @@ class MyMovieRecyclerViewAdapter(
     private val description = binding.movieDescription
     private val card = binding.movieCard
     private val image = binding.moviePoster
+    private val rating = binding.rating
 
     companion object {
         fun create(parent: ViewGroup, onSelect: (Movie) -> Unit): MyMovieRecyclerViewAdapter {
@@ -41,6 +43,12 @@ class MyMovieRecyclerViewAdapter(
         description.text = movie.description
         card.setOnClickListener {
             onSelect(movie)
+        }
+        if (movie.rating > 0) {
+            rating.text = movie.rating.toString()
+            rating.visibility = View.VISIBLE
+        } else {
+            rating.visibility = View.GONE
         }
     }
 }
