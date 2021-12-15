@@ -14,6 +14,8 @@ import com.appydinos.moviebrowser.ui.movielist.adapter.MoviesAdapter
 import com.appydinos.moviebrowser.ui.movielist.adapter.MoviesLoadStateAdapter
 import com.appydinos.moviebrowser.ui.movielist.viewmodel.MovieListViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import dev.chrisbanes.insetter.Insetter
+import dev.chrisbanes.insetter.windowInsetTypesOf
 import kotlinx.coroutines.flow.collectLatest
 
 /**
@@ -50,6 +52,7 @@ class MovieListFragment : Fragment() {
                 binding.errorView.visibility = View.GONE
             }
         }
+        setWindowInsets(binding.list)
         return binding.root
     }
 
@@ -60,5 +63,12 @@ class MovieListFragment : Fragment() {
                 moviesAdapter.submitData(it)
             }
         }
+    }
+
+   private fun setWindowInsets(v: View) {
+        Insetter.builder()
+            .padding(windowInsetTypesOf(navigationBars = true))
+            .margin(windowInsetTypesOf(statusBars = true))
+            .applyToView(v)
     }
 }

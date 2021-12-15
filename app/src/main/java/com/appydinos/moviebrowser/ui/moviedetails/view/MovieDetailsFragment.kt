@@ -23,6 +23,8 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestListener
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import dagger.hilt.android.AndroidEntryPoint
+import dev.chrisbanes.insetter.Insetter
+import dev.chrisbanes.insetter.windowInsetTypesOf
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -61,6 +63,16 @@ class MovieDetailsFragment : Fragment() {
             }
         }
 
+        Insetter.builder()
+            .padding(windowInsetTypesOf(navigationBars = false))
+            .margin(windowInsetTypesOf(statusBars = true))
+            .applyToView(binding.root)
+
+        Insetter.builder()
+            .padding(windowInsetTypesOf(navigationBars = true))
+            .margin(windowInsetTypesOf(statusBars = false))
+            .applyToView(binding.movieDescription)
+        
         viewModel.getMovieDetails(args.id)
         return binding.root
     }
