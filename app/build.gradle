@@ -92,7 +92,10 @@ dependencies {
     //Make java 8 methods available on older version of android
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
 
+    //For easy window insets
     implementation "dev.chrisbanes.insetter:insetter:0.6.1"
+
+    implementation "androidx.slidingpanelayout:slidingpanelayout:1.2.0-beta01"
 
     //Test
     testImplementation 'junit:junit:4.13.2'

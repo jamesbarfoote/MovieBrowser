@@ -55,16 +55,33 @@
             app:layout_constraintTop_toBottomOf="@+id/error_text" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/list"
-        android:name="com.appydinos.moviebrowser.ui.MovieFragment"
+    <androidx.slidingpanelayout.widget.SlidingPaneLayout
+        android:id="@+id/sliding_pane_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:paddingTop="8dp"
-        android:clipToPadding="false"
-        app:layoutManager="LinearLayoutManager"
-        tools:context=".ui.movielist.view.MovieListFragment"
-        tools:listitem="@layout/movie_item" />
+        android:layout_height="match_parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/list"
+            android:name="com.appydinos.moviebrowser.ui.MovieFragment"
+            android:layout_width="450dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="start"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:clipToPadding="false"
+            android:paddingTop="8dp"
+            android:layout_weight="1"
+            app:layoutManager="LinearLayoutManager"
+            tools:context=".ui.movielist.view.MovieListFragment"
+            tools:listitem="@layout/movie_item" />
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/detail_container"
+            android:name="androidx.navigation.fragment.NavHostFragment"
+            android:layout_width="300dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="#ff333333"
+            app:navGraph="@navigation/sliding_pane_nav_graph" />
+    </androidx.slidingpanelayout.widget.SlidingPaneLayout>
 </LinearLayout>

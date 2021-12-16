@@ -11,7 +11,6 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.appydinos.moviebrowser.R
 import com.appydinos.moviebrowser.databinding.FragmentMovieDetailsBinding
@@ -28,14 +27,13 @@ import dev.chrisbanes.insetter.windowInsetTypesOf
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 
 @AndroidEntryPoint
 class MovieDetailsFragment : Fragment() {
     private lateinit var binding: FragmentMovieDetailsBinding
     private val viewModel: MovieDetailsViewModel by viewModels()
-
-    private val args: MovieDetailsFragmentArgs by navArgs()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,7 +47,7 @@ class MovieDetailsFragment : Fragment() {
         binding.movieDetailsToolbar.title = "Details"
         binding.movieDetailsToolbar.setNavigationIcon(R.drawable.ic_round_arrow_back_24)
         binding.movieDetailsToolbar.setNavigationOnClickListener {
-            findNavController().navigateUp()
+            requireActivity().onBackPressed()
         }
 
         binding.movieDetailsToolbar.inflateMenu(R.menu.details_menu)
@@ -72,9 +70,21 @@ class MovieDetailsFragment : Fragment() {
             .padding(windowInsetTypesOf(navigationBars = true))
             .margin(windowInsetTypesOf(statusBars = false))
             .applyToView(binding.movieDescription)
-        
-        viewModel.getMovieDetails(args.id)
+
+        val id = getMovieId()
+        Timber.v("New movie id = $id")
+        viewModel.getMovieDetails(id)
         return binding.root
+    }
+
+    private fun getMovieId(): Int {
+        return try {
+            val args: MovieDetailsFragmentArgs by navArgs()
+            args.id
+        } catch (ex: Exception) {
+            //TODO Show a view stating why its empty
+            1
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -137,7 +147,7 @@ class MovieDetailsFragment : Fragment() {
                         binding.errorView.visibility = View.VISIBLE
                         binding.lottieLoader.visibility = View.GONE
                         binding.errorRetryButton.setOnClickListener {
-                            viewModel.getMovieDetails(args.id)
+                            viewModel.getMovieDetails(getMovieId())
                         }
                     }
                 }
