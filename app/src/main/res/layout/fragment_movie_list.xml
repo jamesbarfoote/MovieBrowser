@@ -63,11 +63,11 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/list"
             android:name="com.appydinos.moviebrowser.ui.MovieFragment"
-            android:layout_width="450dp"
+            android:layout_width="350dp"
             android:layout_height="match_parent"
             android:layout_gravity="start"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
             android:clipToPadding="false"
             android:paddingTop="8dp"
             android:layout_weight="1"
@@ -80,7 +80,7 @@
             android:name="androidx.navigation.fragment.NavHostFragment"
             android:layout_width="300dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
+            android:layout_weight="2"
             android:background="#ff333333"
             app:navGraph="@navigation/sliding_pane_nav_graph" />
     </androidx.slidingpanelayout.widget.SlidingPaneLayout>

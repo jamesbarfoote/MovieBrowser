@@ -6,7 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.core.os.bundleOf
+import androidx.core.view.doOnNextLayout
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavOptions
@@ -18,6 +20,7 @@ import com.appydinos.moviebrowser.databinding.FragmentMovieListBinding
 import com.appydinos.moviebrowser.ui.movielist.adapter.MoviesAdapter
 import com.appydinos.moviebrowser.ui.movielist.adapter.MoviesLoadStateAdapter
 import com.appydinos.moviebrowser.ui.movielist.viewmodel.MovieListViewModel
+import com.appydinos.moviebrowser.ui.movielist.viewmodel.MoviesSlidingPaneViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import dev.chrisbanes.insetter.Insetter
 import dev.chrisbanes.insetter.windowInsetTypesOf
@@ -29,6 +32,7 @@ import kotlinx.coroutines.flow.collectLatest
 @AndroidEntryPoint
 class MovieListFragment : Fragment() {
     private val viewModel: MovieListViewModel by viewModels()
+    private val movieSlidingPaneViewModel: MoviesSlidingPaneViewModel by activityViewModels()
     private lateinit var moviesAdapter: MoviesAdapter
     private lateinit var binding: FragmentMovieListBinding
 
@@ -63,7 +67,6 @@ class MovieListFragment : Fragment() {
             }
         }
         setWindowInsets(binding.list)
-
         return binding.root
     }
 
@@ -92,6 +95,9 @@ class MovieListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding.slidingPaneLayout.doOnNextLayout {
+            movieSlidingPaneViewModel.setIsTwoPane(!binding.slidingPaneLayout.isSlideable)
+        }
         lifecycleScope.launchWhenCreated {
             viewModel.moviesList.collectLatest {
                 moviesAdapter.submitData(it)
@@ -101,7 +107,7 @@ class MovieListFragment : Fragment() {
 
     private fun setWindowInsets(v: View) {
         Insetter.builder()
-            .padding(windowInsetTypesOf(navigationBars = true))
+            .paddingBottom(windowInsetTypesOf(navigationBars = true))
             .padding(windowInsetTypesOf(statusBars = true))
             .applyToView(v)
     }
@@ -109,7 +115,7 @@ class MovieListFragment : Fragment() {
 
 class TwoPaneOnBackPressedCallback(
     private val slidingPaneLayout: SlidingPaneLayout
-) : OnBackPressedCallback(slidingPaneLayout.isSlideable && slidingPaneLayout.isOpen), SlidingPaneLayout.PanelSlideListener {
+) : OnBackPressedCallback(slidingPaneLayout.isOpen), SlidingPaneLayout.PanelSlideListener {
 
     init {
         slidingPaneLayout.addPanelSlideListener(this)
@@ -119,7 +125,7 @@ class TwoPaneOnBackPressedCallback(
         slidingPaneLayout.closePane()
     }
 
-    override fun onPanelSlide(panel: View, slideOffset: Float) { }
+    override fun onPanelSlide(panel: View, slideOffset: Float) {}
 
     override fun onPanelOpened(panel: View) {
         isEnabled = true
