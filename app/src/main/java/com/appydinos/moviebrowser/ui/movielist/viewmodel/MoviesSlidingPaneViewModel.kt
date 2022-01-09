@@ -6,6 +6,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
+/**
+ * A Shared ViewModel between the list and details.
+ * This enables us to know the current state of the sliding panel
+ */
 @HiltViewModel
 class MoviesSlidingPaneViewModel @Inject constructor(): ViewModel() {
 
@@ -15,5 +19,4 @@ class MoviesSlidingPaneViewModel @Inject constructor(): ViewModel() {
     fun setIsTwoPane(isTwoPane: Boolean) {
         _isTwoPane.value = isTwoPane
     }
-
 }
