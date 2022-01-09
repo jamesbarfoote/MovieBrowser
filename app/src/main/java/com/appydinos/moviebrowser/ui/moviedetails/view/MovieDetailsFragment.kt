@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.RawRes
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -32,7 +31,6 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-
 @AndroidEntryPoint
 class MovieDetailsFragment : Fragment() {
     private lateinit var binding: FragmentMovieDetailsBinding
@@ -46,8 +44,12 @@ class MovieDetailsFragment : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?): View {
-        binding = FragmentMovieDetailsBinding.inflate(inflater)
+        savedInstanceState: Bundle?
+    ): View {
+        binding = FragmentMovieDetailsBinding.inflate(inflater, container, false)
+        binding.viewModel = viewModel
+
+        binding.lifecycleOwner = viewLifecycleOwner
         binding.movieDetailsToolbar.title = "Details"
 
         binding.movieDetailsToolbar.inflateMenu(R.menu.details_menu)
@@ -57,8 +59,13 @@ class MovieDetailsFragment : Fragment() {
                     startActivity(Intent(requireContext(), OssLicensesMenuActivity::class.java))
                     true
                 }
-                else -> { false }
+                else -> {
+                    false
+                }
             }
+        }
+        binding.messageRetryButton.setOnClickListener {
+            viewModel.getMovieDetails(getMovieId())
         }
 
         Insetter.builder()
@@ -72,12 +79,7 @@ class MovieDetailsFragment : Fragment() {
             .paddingRight(windowInsetTypesOf(navigationBars = true))
             .applyToView(binding.root)
 
-        val id = getMovieId()
-        if (id > 0) {
-            viewModel.getMovieDetails(id)
-        } else {
-            setMessage(show = true, text = "Select a movie to see its details", R.raw.loader_movie)
-        }
+        viewModel.getMovieDetails(getMovieId())
         return binding.root
     }
 
@@ -133,24 +135,6 @@ class MovieDetailsFragment : Fragment() {
                         binding.movieTagline.text = movie?.tagLine
                     }
                     binding.rating.text = movie?.getRatingText()
-                    if (movie != null) {
-                        binding.lottieLoader.visibility = View.GONE
-                        errorView(show = false, null)
-                    }
-                }
-            }
-        }
-
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.errorText.collectLatest { errorText ->
-                    if (errorText != null) {
-                        errorView(show = true, errorText = errorText)
-                        binding.lottieLoader.visibility = View.GONE
-                        binding.messageRetryButton.setOnClickListener {
-                            viewModel.getMovieDetails(getMovieId())
-                        }
-                    }
                 }
             }
         }
@@ -162,7 +146,7 @@ class MovieDetailsFragment : Fragment() {
         lifecycleScope.launch {
             movieSlidingPaneViewModel.isTwoPane
                 .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
-                .collectLatest {isTwoPane ->
+                .collectLatest { isTwoPane ->
                     if (!isTwoPane) {
                         binding.movieDetailsToolbar.setNavigationIcon(R.drawable.ic_round_arrow_back_24)
                         binding.movieDetailsToolbar.setNavigationOnClickListener {
@@ -173,21 +157,6 @@ class MovieDetailsFragment : Fragment() {
                         binding.movieDetailsToolbar.setNavigationOnClickListener(null)
                     }
                 }
-        }
-    }
-
-    private fun errorView(show: Boolean, errorText: String?) {
-        setMessage(show = show, text = errorText, lottieId = (R.raw.details_error))
-    }
-
-    private fun setMessage(show: Boolean, text: String?, @RawRes lottieId: Int) {
-        if (show) {
-            binding.lottieLoader.visibility = View.GONE
-            binding.messageView.visibility = View.VISIBLE
-            binding.lottieMessage.setAnimation(lottieId)
-            binding.messageText.text = text
-        } else {
-            binding.messageView.visibility = View.GONE
         }
     }
 }

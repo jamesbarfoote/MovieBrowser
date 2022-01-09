@@ -41,8 +41,10 @@ class MovieListFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentMovieListBinding.inflate(inflater)
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner,
-            TwoPaneOnBackPressedCallback(binding.slidingPaneLayout))
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
+            TwoPaneOnBackPressedCallback(binding.slidingPaneLayout)
+        )
         moviesAdapter = MoviesAdapter { selectedMovie ->
             openDetails(selectedMovie.id, binding)
         }
