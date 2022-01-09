@@ -7,15 +7,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.appydinos.moviebrowser.R
 import com.appydinos.moviebrowser.databinding.FragmentMovieDetailsBinding
 import com.appydinos.moviebrowser.ui.moviedetails.viewmodel.MovieDetailsViewModel
+import com.appydinos.moviebrowser.ui.movielist.viewmodel.MoviesSlidingPaneViewModel
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
@@ -29,13 +31,11 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-
 @AndroidEntryPoint
 class MovieDetailsFragment : Fragment() {
     private lateinit var binding: FragmentMovieDetailsBinding
     private val viewModel: MovieDetailsViewModel by viewModels()
-
-    private val args: MovieDetailsFragmentArgs by navArgs()
+    private val movieSlidingPaneViewModel: MoviesSlidingPaneViewModel by activityViewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,13 +44,13 @@ class MovieDetailsFragment : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?): View {
-        binding = FragmentMovieDetailsBinding.inflate(inflater)
+        savedInstanceState: Bundle?
+    ): View {
+        binding = FragmentMovieDetailsBinding.inflate(inflater, container, false)
+        binding.viewModel = viewModel
+
+        binding.lifecycleOwner = viewLifecycleOwner
         binding.movieDetailsToolbar.title = "Details"
-        binding.movieDetailsToolbar.setNavigationIcon(R.drawable.ic_round_arrow_back_24)
-        binding.movieDetailsToolbar.setNavigationOnClickListener {
-            findNavController().navigateUp()
-        }
 
         binding.movieDetailsToolbar.inflateMenu(R.menu.details_menu)
         binding.movieDetailsToolbar.setOnMenuItemClickListener { item ->
@@ -59,28 +59,42 @@ class MovieDetailsFragment : Fragment() {
                     startActivity(Intent(requireContext(), OssLicensesMenuActivity::class.java))
                     true
                 }
-                else -> { false }
+                else -> {
+                    false
+                }
             }
         }
-
-        Insetter.builder()
-            .padding(windowInsetTypesOf(navigationBars = false))
-            .margin(windowInsetTypesOf(statusBars = true))
-            .applyToView(binding.root)
+        binding.messageRetryButton.setOnClickListener {
+            viewModel.getMovieDetails(getMovieId())
+        }
 
         Insetter.builder()
             .padding(windowInsetTypesOf(navigationBars = true))
             .margin(windowInsetTypesOf(statusBars = false))
-            .applyToView(binding.movieDescription)
-        
-        viewModel.getMovieDetails(args.id)
+            .applyToView(binding.detailsView)
+
+        Insetter.builder()
+            .margin(windowInsetTypesOf(statusBars = true))
+            .padding(windowInsetTypesOf(navigationBars = false))
+            .paddingRight(windowInsetTypesOf(navigationBars = true))
+            .applyToView(binding.root)
+
+        viewModel.getMovieDetails(getMovieId())
         return binding.root
+    }
+
+    private fun getMovieId(): Int {
+        return try {
+            val args: MovieDetailsFragmentArgs by navArgs()
+            args.id
+        } catch (ex: Exception) {
+            -1
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.progressSpinner.visibility = View.VISIBLE
-
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.movie.collect { movie ->
@@ -121,27 +135,28 @@ class MovieDetailsFragment : Fragment() {
                         binding.movieTagline.text = movie?.tagLine
                     }
                     binding.rating.text = movie?.getRatingText()
-                    if (movie != null) {
-                        binding.lottieLoader.visibility = View.GONE
-                        binding.errorView.visibility = View.GONE
-                    }
                 }
             }
         }
 
+        setNavIcon()
+    }
+
+    private fun setNavIcon() {
         lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.errorText.collectLatest { errorText ->
-                    if (errorText != null) {
-                        binding.errorText.text = errorText
-                        binding.errorView.visibility = View.VISIBLE
-                        binding.lottieLoader.visibility = View.GONE
-                        binding.errorRetryButton.setOnClickListener {
-                            viewModel.getMovieDetails(args.id)
+            movieSlidingPaneViewModel.isTwoPane
+                .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
+                .collectLatest { isTwoPane ->
+                    if (!isTwoPane) {
+                        binding.movieDetailsToolbar.setNavigationIcon(R.drawable.ic_round_arrow_back_24)
+                        binding.movieDetailsToolbar.setNavigationOnClickListener {
+                            requireActivity().onBackPressed()
                         }
+                    } else {
+                        binding.movieDetailsToolbar.navigationIcon = null
+                        binding.movieDetailsToolbar.setNavigationOnClickListener(null)
                     }
                 }
-            }
         }
     }
 }

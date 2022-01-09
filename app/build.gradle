@@ -37,6 +37,7 @@ android {
     }
     buildFeatures {
         viewBinding true
+        dataBinding true
     }
     testOptions {
         unitTests.includeAndroidResources = true
@@ -56,10 +57,10 @@ dependencies {
     implementation "com.squareup.okhttp3:okhttp:4.9.2"
 
     //DI
-    implementation "com.google.dagger:hilt-android:2.38.1"
+    implementation "com.google.dagger:hilt-android:2.40.5"
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
-    kapt "com.google.dagger:hilt-compiler:2.38.1"
+    kapt "com.google.dagger:hilt-compiler:2.40.5"
 
     //Navigation
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
@@ -92,7 +93,11 @@ dependencies {
     //Make java 8 methods available on older version of android
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
 
+    //For easy window insets
     implementation "dev.chrisbanes.insetter:insetter:0.6.1"
+
+    //For split layout on larger displays / landscape
+    implementation "androidx.slidingpanelayout:slidingpanelayout:1.2.0-rc01"
 
     //Test
     testImplementation 'junit:junit:4.13.2'

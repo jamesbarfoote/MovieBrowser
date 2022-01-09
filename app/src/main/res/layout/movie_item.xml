@@ -23,8 +23,10 @@
 
             <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/moviePoster"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                app:layout_constraintHeight_max="400dp"
+                android:adjustViewBounds="true"
                 app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize5Percent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -41,7 +43,7 @@
                 android:textStyle="bold"
                 android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="@+id/moviePoster"
-                app:layout_constraintStart_toStartOf="parent"/>
+                app:layout_constraintStart_toStartOf="@+id/moviePoster"/>
 
             <TextView
                 android:id="@+id/movieTitle"
