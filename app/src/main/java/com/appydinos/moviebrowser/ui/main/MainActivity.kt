@@ -34,7 +34,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.navigation_watchlist -> {
                     Timber.v("navigation_watchlist")
-                    Navigation.findNavController(this, R.id.nav_host_fragment).navigate(R.id.movieListFragment)
+                    Navigation.findNavController(this, R.id.nav_host_fragment).navigate(R.id.watchlistFragment)
                     true
                 }
                 R.id.navigation_settings -> {

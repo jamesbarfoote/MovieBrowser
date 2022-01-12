@@ -15,5 +15,13 @@
             app:destination="@id/movieDetailsFragment"
             app:enterAnim="@animator/nav_default_enter_anim"
             app:popExitAnim="@android:anim/slide_out_right" />
+        <action
+            android:id="@+id/action_movieListFragment_to_watchlistFragment"
+            app:destination="@id/watchlistFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/watchlistFragment"
+        android:name="com.appydinos.moviebrowser.ui.watchlist.view.WatchlistFragment"
+        android:label="fragment_watchlist"
+        tools:layout="@layout/fragment_watchlist" />
 </navigation>
