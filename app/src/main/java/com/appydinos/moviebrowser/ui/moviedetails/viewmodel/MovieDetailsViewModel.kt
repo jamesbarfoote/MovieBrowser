@@ -6,7 +6,9 @@ import androidx.lifecycle.viewModelScope
 import com.appydinos.moviebrowser.R
 import com.appydinos.moviebrowser.data.model.Movie
 import com.appydinos.moviebrowser.data.repo.MoviesRepository
+import com.appydinos.moviebrowser.data.repo.WatchlistRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -14,7 +16,10 @@ import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
-class MovieDetailsViewModel @Inject constructor(private val repository: MoviesRepository) : ViewModel() {
+class MovieDetailsViewModel @Inject constructor(
+    private val repository: MoviesRepository,
+    private val watchlistRepository: WatchlistRepository) : ViewModel() {
+
     private val _movie = MutableStateFlow<Movie?>(null)
     val movie: StateFlow<Movie?> = _movie
 
@@ -58,5 +63,11 @@ class MovieDetailsViewModel @Inject constructor(private val repository: MoviesRe
         _messageText.value = errorMessage
         _messageAnimation.value = animation
         _canRetry.value = canRetry
+    }
+
+    fun addToWatchList() {
+        viewModelScope.launch(Dispatchers.IO) {
+            movie.value?.let { watchlistRepository.addMovie(it) }
+        }
     }
 }

@@ -4,8 +4,12 @@ import androidx.paging.PagingData
 import com.appydinos.moviebrowser.data.model.Movie
 import kotlinx.coroutines.flow.Flow
 
-interface IMoviesRepository {
-    fun getNowPlayingMovies(pageSize: Int): Flow<PagingData<Movie>>
+interface IWatchlistRepository {
+    suspend fun getWatchlist(): Flow<PagingData<Movie>>
+
+    suspend fun addMovie(movie: Movie): Long?
+
+    suspend fun deleteMovie(movieId: Int)
 
     suspend fun getMovieDetails(movieId: Int): Movie?
 }

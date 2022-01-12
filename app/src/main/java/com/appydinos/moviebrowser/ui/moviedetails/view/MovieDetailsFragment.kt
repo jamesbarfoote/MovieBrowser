@@ -13,9 +13,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.appydinos.moviebrowser.R
 import com.appydinos.moviebrowser.databinding.FragmentMovieDetailsBinding
+import com.appydinos.moviebrowser.extensions.showShortToast
 import com.appydinos.moviebrowser.ui.moviedetails.viewmodel.MovieDetailsViewModel
 import com.appydinos.moviebrowser.ui.movielist.viewmodel.MoviesSlidingPaneViewModel
 import com.bumptech.glide.Glide
@@ -57,6 +59,11 @@ class MovieDetailsFragment : Fragment() {
             when (item.itemId) {
                 R.id.oss_licenses -> {
                     startActivity(Intent(requireContext(), OssLicensesMenuActivity::class.java))
+                    true
+                }
+                R.id.add_to_watchlist -> {
+                    viewModel.addToWatchList()
+                    context?.showShortToast("Movie added to Watchlist")
                     true
                 }
                 else -> {

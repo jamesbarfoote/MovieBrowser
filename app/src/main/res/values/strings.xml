@@ -8,4 +8,5 @@
     <string name="title_movies">Movies</string>
     <string name="watchlist">Watchlist</string>
     <string name="settings_title">Settings</string>
+    <string name="add_to_watchlist">Add to Watchlist</string>
 </resources>
