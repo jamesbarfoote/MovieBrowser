@@ -5,4 +5,7 @@
     <string name="retry">Retry</string>
     <string name="oss_licenses">Open Source Licenses</string>
     <string name="data_from">Data from themoviedb.org</string>
+    <string name="title_movies">Movies</string>
+    <string name="watchlist">Watchlist</string>
+    <string name="settings_title">Settings</string>
 </resources>

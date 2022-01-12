@@ -69,14 +69,9 @@ class MovieDetailsFragment : Fragment() {
         }
 
         Insetter.builder()
-            .padding(windowInsetTypesOf(navigationBars = true))
-            .margin(windowInsetTypesOf(statusBars = false))
-            .applyToView(binding.detailsView)
-
-        Insetter.builder()
             .margin(windowInsetTypesOf(statusBars = true))
             .padding(windowInsetTypesOf(navigationBars = false))
-            .paddingRight(windowInsetTypesOf(navigationBars = true))
+            .paddingRight(windowInsetTypesOf(navigationBars = false))
             .applyToView(binding.root)
 
         viewModel.getMovieDetails(getMovieId())

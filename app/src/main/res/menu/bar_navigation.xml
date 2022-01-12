@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/navigation_movies"
+        android:icon="@drawable/ic_nav_movies"
+        android:title="@string/title_movies"
+        app:contentDescription="@string/title_movies" />
+
+    <item
+        android:id="@+id/navigation_watchlist"
+        android:icon="@drawable/ic_nav_watchlist"
+        android:title="@string/watchlist"
+        app:contentDescription="@string/watchlist" />
+
+    <item
+        android:id="@+id/navigation_settings"
+        android:icon="@drawable/ic_nav_settings"
+        android:title="@string/settings_title"
+        app:contentDescription="@string/settings_title" />
+</menu>
