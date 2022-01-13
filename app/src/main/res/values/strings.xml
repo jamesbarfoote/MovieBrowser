@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MovieBrowser</string>
+    <string name="app_name">Movie Browser</string>
     <string name="overview">Overview</string>
     <string name="rating">Rating</string>
     <string name="retry">Retry</string>

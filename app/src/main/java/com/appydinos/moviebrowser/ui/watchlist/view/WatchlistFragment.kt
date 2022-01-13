@@ -1,22 +1,17 @@
 package com.appydinos.moviebrowser.ui.watchlist.view
 
-import android.content.res.Configuration
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.map
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import androidx.recyclerview.widget.StaggeredGridLayoutManager.VERTICAL
 import com.appydinos.moviebrowser.databinding.FragmentWatchlistBinding
 import com.appydinos.moviebrowser.extensions.showShortToast
-import com.appydinos.moviebrowser.ui.movielist.adapter.MoviesAdapter
 import com.appydinos.moviebrowser.ui.movielist.adapter.MoviesLoadStateAdapter
 import com.appydinos.moviebrowser.ui.watchlist.adapter.WatchlistAdapter
 import com.appydinos.moviebrowser.ui.watchlist.viewmodel.WatchlistViewModel
@@ -32,6 +27,7 @@ import kotlinx.coroutines.flow.collectLatest
 class WatchlistFragment : Fragment() {
     private val viewModel: WatchlistViewModel by viewModels()
     private lateinit var watchlistAdapter: WatchlistAdapter
+    private var watchlistBottomSheet: WatchlistBottomSheet? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -44,9 +40,9 @@ class WatchlistFragment : Fragment() {
             context?.showShortToast("Selected ${selectedMovie.title}")
             //TODO Go to movie details
         }) { selectedMovie ->
-            WatchlistBottomSheet(selectedMovie.title) { viewModel.deleteMovie(selectedMovie.id) }
-                .show(childFragmentManager, WatchlistBottomSheet.TAG)
-
+            watchlistBottomSheet = WatchlistBottomSheet.newInstance(selectedMovie.title) { viewModel.deleteMovie(selectedMovie.id) }.also {
+                it.show(childFragmentManager, WatchlistBottomSheet.TAG)
+            }
         }
         binding.list.adapter =
             watchlistAdapter.withLoadStateFooter(footer = MoviesLoadStateAdapter(watchlistAdapter::retry))
@@ -66,6 +62,13 @@ class WatchlistFragment : Fragment() {
             viewModel.watchList.collectLatest {
                 watchlistAdapter.submitData(it.map { watchlist -> watchlist.movie })
             }
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (watchlistBottomSheet != null) {
+            watchlistBottomSheet?.dismiss()
         }
     }
 }

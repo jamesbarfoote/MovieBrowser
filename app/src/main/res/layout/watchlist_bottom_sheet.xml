@@ -7,7 +7,7 @@
     android:layout_height="match_parent">
 
     <FrameLayout
-        android:id="@+id/wishlist_bottom_sheet_root"
+        android:id="@+id/watchlist_bottom_sheet_root"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingTop="8dp"
@@ -20,10 +20,13 @@
 
             <TextView
                 android:id="@+id/title"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
                 android:paddingBottom="8dp"
                 android:textSize="24sp"
+                android:textAlignment="center"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -52,6 +55,7 @@
                 android:textAllCaps="false"
                 android:textSize="14sp"
                 android:textColor="@color/white"
+                app:elevation="1dp"
                 app:cornerRadius="16dp"
                 app:backgroundTint="@color/red"
                 app:layout_constraintEnd_toEndOf="parent"
