@@ -1,6 +1,7 @@
 package com.appydinos.moviebrowser.data.model
 
 import android.os.Parcelable
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.appydinos.moviebrowser.extensions.toHoursAndMinutes
@@ -11,10 +12,9 @@ import java.util.*
 
 private const val POSTER_BASE_URL = "https://image.tmdb.org/t/p/w500"
 
-@Entity(tableName = "Watchlist")
 @Parcelize
 data class Movie(
-    @PrimaryKey val id: Int,
+    @ColumnInfo(name = "movie_id") val id: Int,
     val title: String,
     val description: String,
     val posterURL: String,
@@ -24,8 +24,7 @@ data class Movie(
     val runTime: String = "",
     val status: String = "",
     val tagLine: String = "",
-    val votes: Int,
-    var watchListedAt: Date? = null
+    val votes: Int
 ): Parcelable {
     fun getFullTitleText(): String {
         val year = try {

@@ -1,6 +1,5 @@
 package com.appydinos.moviebrowser.data.dp
 
-import androidx.lifecycle.LiveData
 import androidx.paging.PagingSource
 import androidx.room.*
 import com.appydinos.moviebrowser.data.model.Movie
@@ -9,15 +8,14 @@ import com.appydinos.moviebrowser.data.model.Movie
 interface WatchlistDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun addToWatchlist(movie: Movie): Long?
+    fun addToWatchlist(movie: WatchlistItem): Long?
 
-    @Query("SELECT * FROM Watchlist ORDER BY watchListedAt desc")
-    fun fetchAllWatchlistMovies(): PagingSource<Int, Movie>
+    @Query("SELECT * FROM Watchlist ORDER BY added_at desc")
+    fun fetchAllWatchlistMovies(): PagingSource<Int, WatchlistItem>
 
-
-    @Query("SELECT * FROM Watchlist WHERE id =:movieId")
+    @Query("SELECT * FROM Watchlist WHERE movie_id=:movieId")
     fun getMovie(movieId: Int): Movie?
 
-    @Query("DELETE FROM Watchlist WHERE id=:movieId")
+    @Query("DELETE FROM Watchlist WHERE movie_id=:movieId")
     fun deleteMovie(movieId: Int)
 }

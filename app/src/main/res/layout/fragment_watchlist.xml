@@ -9,7 +9,7 @@
     <TextView
         android:id="@+id/watchlist_title"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:padding="8dp"
         android:text="@string/watchlist"
         android:textSize="32sp"
@@ -23,7 +23,7 @@
         android:id="@+id/list"
         android:name="com.appydinos.moviebrowser.ui.watchlist.WatchlistFragment"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_gravity="start"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
