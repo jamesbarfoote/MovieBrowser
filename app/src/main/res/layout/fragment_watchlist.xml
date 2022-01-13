@@ -30,11 +30,11 @@
         android:clipToPadding="false"
         android:paddingTop="8dp"
         android:layout_weight="1"
-        app:layoutManager="LinearLayoutManager"
+        app:layoutManager="androidx.recyclerview.widget.StaggeredGridLayoutManager"
         app:layout_constraintTop_toBottomOf="@+id/watchlist_title"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         tools:context=".ui.movielist.view.WatchlistFragment"
-        tools:listitem="@layout/movie_item" />
+        tools:listitem="@layout/watchlist_item" />
 </androidx.constraintlayout.widget.ConstraintLayout>

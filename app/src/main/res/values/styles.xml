@@ -3,4 +3,13 @@
     <style name="ShapeAppearanceOverlay.App.CornerSize5Percent" parent="">
         <item name="cornerSize">5%</item>
     </style>
+
+    <style name="BottomSheetDialogStyle" parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="behavior_peekHeight">600dp</item>
+        <item name="bottomSheetStyle">@style/bottomSheetBackground</item>
+    </style>
+
+    <style name="bottomSheetBackground" parent="Widget.Design.BottomSheet.Modal">
+        <item name="android:background">@drawable/rounded_top_corners</item>
+    </style>
 </resources>
