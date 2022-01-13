@@ -7,11 +7,11 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.paging.map
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.appydinos.moviebrowser.databinding.FragmentWatchlistBinding
-import com.appydinos.moviebrowser.extensions.showShortToast
 import com.appydinos.moviebrowser.ui.movielist.adapter.MoviesLoadStateAdapter
 import com.appydinos.moviebrowser.ui.watchlist.adapter.WatchlistAdapter
 import com.appydinos.moviebrowser.ui.watchlist.viewmodel.WatchlistViewModel
@@ -37,8 +37,7 @@ class WatchlistFragment : Fragment() {
         binding.list.layoutManager = GridLayoutManager(context, 2, RecyclerView.VERTICAL, false)
 
         watchlistAdapter = WatchlistAdapter(onSelect = { selectedMovie ->
-            context?.showShortToast("Selected ${selectedMovie.title}")
-            //TODO Go to movie details
+            findNavController().navigate(WatchlistFragmentDirections.actionWatchlistFragmentToMovieDetailsFragment(movie = selectedMovie, origin = "Watchlist"))
         }) { selectedMovie ->
             watchlistBottomSheet = WatchlistBottomSheet.newInstance(selectedMovie.title) { viewModel.deleteMovie(selectedMovie.id) }.also {
                 it.show(childFragmentManager, WatchlistBottomSheet.TAG)

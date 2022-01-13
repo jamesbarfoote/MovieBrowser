@@ -70,4 +70,9 @@ class MovieDetailsViewModel @Inject constructor(
             movie.value?.let { watchlistRepository.addMovie(it) }
         }
     }
+
+    fun setMovie(movie: Movie) {
+        _showDetailsLoader.value = false
+        _movie.value = movie
+    }
 }

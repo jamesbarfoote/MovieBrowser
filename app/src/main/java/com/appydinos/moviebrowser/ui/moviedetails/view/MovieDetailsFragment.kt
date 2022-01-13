@@ -13,7 +13,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.appydinos.moviebrowser.R
 import com.appydinos.moviebrowser.databinding.FragmentMovieDetailsBinding
@@ -38,6 +37,7 @@ class MovieDetailsFragment : Fragment() {
     private lateinit var binding: FragmentMovieDetailsBinding
     private val viewModel: MovieDetailsViewModel by viewModels()
     private val movieSlidingPaneViewModel: MoviesSlidingPaneViewModel by activityViewModels()
+    private var isFromWatchlist: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,17 +81,23 @@ class MovieDetailsFragment : Fragment() {
             .paddingRight(windowInsetTypesOf(navigationBars = false))
             .applyToView(binding.root)
 
-        viewModel.getMovieDetails(getMovieId())
+        val movie = try {
+            val args: MovieDetailsFragmentArgs by navArgs()
+            isFromWatchlist = args.origin == "Watchlist"
+            args.movie
+        } catch (ex: java.lang.Exception) {
+            null
+        }
+        if (movie == null) {
+            viewModel.getMovieDetails(getMovieId())
+        } else {
+            viewModel.setMovie(movie)
+        }
         return binding.root
     }
 
     private fun getMovieId(): Int {
-        return try {
-            val args: MovieDetailsFragmentArgs by navArgs()
-            args.id
-        } catch (ex: Exception) {
-            -1
-        }
+        return arguments?.get("itemId") as? Int ?: -1
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -149,7 +155,7 @@ class MovieDetailsFragment : Fragment() {
             movieSlidingPaneViewModel.isTwoPane
                 .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
                 .collectLatest { isTwoPane ->
-                    if (!isTwoPane) {
+                    if (!isTwoPane || isFromWatchlist) {
                         binding.movieDetailsToolbar.setNavigationIcon(R.drawable.ic_round_arrow_back_24)
                         binding.movieDetailsToolbar.setNavigationOnClickListener {
                             requireActivity().onBackPressed()

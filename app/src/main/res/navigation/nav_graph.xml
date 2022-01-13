@@ -11,11 +11,6 @@
         android:label="fragment_movie_list"
         tools:layout="@layout/fragment_movie_list" >
         <action
-            android:id="@+id/movieListFragment_to_movieDetailsFragment"
-            app:destination="@id/movieDetailsFragment"
-            app:enterAnim="@animator/nav_default_enter_anim"
-            app:popExitAnim="@android:anim/slide_out_right" />
-        <action
             android:id="@+id/action_movieListFragment_to_watchlistFragment"
             app:destination="@id/watchlistFragment" />
     </fragment>
@@ -23,5 +18,25 @@
         android:id="@+id/watchlistFragment"
         android:name="com.appydinos.moviebrowser.ui.watchlist.view.WatchlistFragment"
         android:label="fragment_watchlist"
-        tools:layout="@layout/fragment_watchlist" />
+        tools:layout="@layout/fragment_watchlist" >
+        <action
+            android:id="@+id/action_watchlistFragment_to_movieDetailsFragment"
+            app:destination="@id/movieDetailsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/movieDetailsFragment"
+        android:name="com.appydinos.moviebrowser.ui.moviedetails.view.MovieDetailsFragment"
+        android:label="MovieDetailsFragment">
+        <argument
+            android:name="movie"
+            app:argType="com.appydinos.moviebrowser.data.model.Movie"
+            app:nullable="true"
+            android:defaultValue="@null"/>
+
+        <argument
+            android:name="origin"
+            app:argType="string"
+            app:nullable="false"
+            android:defaultValue="MoviesList"/>
+    </fragment>
 </navigation>
