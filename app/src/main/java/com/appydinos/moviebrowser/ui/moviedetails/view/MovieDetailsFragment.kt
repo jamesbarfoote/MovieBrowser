@@ -24,6 +24,7 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import dagger.hilt.android.AndroidEntryPoint
 import dev.chrisbanes.insetter.Insetter
@@ -132,6 +133,7 @@ class MovieDetailsFragment : Fragment() {
                     Glide.with(requireContext())
                         .load(movie?.posterURL)
                         .transition(DrawableTransitionOptions.withCrossFade())
+                        .override(Target.SIZE_ORIGINAL)
                         .addListener(object : RequestListener<Drawable> {
                             override fun onLoadFailed(
                                 e: GlideException?,

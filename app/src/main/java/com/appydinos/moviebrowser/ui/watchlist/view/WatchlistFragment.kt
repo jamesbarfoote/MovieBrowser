@@ -8,17 +8,18 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.paging.LoadState
 import androidx.paging.map
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.appydinos.moviebrowser.databinding.FragmentWatchlistBinding
 import com.appydinos.moviebrowser.ui.movielist.adapter.MoviesLoadStateAdapter
 import com.appydinos.moviebrowser.ui.watchlist.adapter.WatchlistAdapter
 import com.appydinos.moviebrowser.ui.watchlist.viewmodel.WatchlistViewModel
+import com.google.android.flexbox.*
 import dagger.hilt.android.AndroidEntryPoint
 import dev.chrisbanes.insetter.Insetter
 import dev.chrisbanes.insetter.windowInsetTypesOf
 import kotlinx.coroutines.flow.collectLatest
+
 
 /**
  * A simple screen that shows the users watch listed items
@@ -34,7 +35,13 @@ class WatchlistFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         val binding = FragmentWatchlistBinding.inflate(inflater, container, false)
-        binding.list.layoutManager = GridLayoutManager(context, 2, RecyclerView.VERTICAL, false)
+
+        val layoutManager = FlexboxLayoutManager(context)
+        layoutManager.flexDirection = FlexDirection.ROW
+        layoutManager.justifyContent = JustifyContent.FLEX_START
+        layoutManager.alignItems = AlignItems.CENTER
+        layoutManager.flexWrap = FlexWrap.WRAP
+        binding.list.layoutManager = layoutManager
 
         watchlistAdapter = WatchlistAdapter(onSelect = { selectedMovie ->
             findNavController().navigate(WatchlistFragmentDirections.actionWatchlistFragmentToMovieDetailsFragment(movie = selectedMovie, origin = "Watchlist"))
@@ -43,6 +50,15 @@ class WatchlistFragment : Fragment() {
                 it.show(childFragmentManager, WatchlistBottomSheet.TAG)
             }
         }
+
+        watchlistAdapter.addLoadStateListener { loadStates ->
+            if ((loadStates.source.refresh is LoadState.NotLoading) && (loadStates.append.endOfPaginationReached) && watchlistAdapter.itemCount == 0) {
+                binding.noWatchlistMovies.visibility = View.VISIBLE
+            } else {
+                binding.noWatchlistMovies.visibility = View.GONE
+            }
+        }
+
         binding.list.adapter =
             watchlistAdapter.withLoadStateFooter(footer = MoviesLoadStateAdapter(watchlistAdapter::retry))
 
