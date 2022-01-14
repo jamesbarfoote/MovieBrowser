@@ -5,8 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.appydinos.moviebrowser.R
 import com.appydinos.moviebrowser.data.model.Movie
+import com.appydinos.moviebrowser.data.repo.IWatchlistRepository
 import com.appydinos.moviebrowser.data.repo.MoviesRepository
-import com.appydinos.moviebrowser.data.repo.WatchlistRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +18,8 @@ import javax.inject.Inject
 @HiltViewModel
 class MovieDetailsViewModel @Inject constructor(
     private val repository: MoviesRepository,
-    private val watchlistRepository: WatchlistRepository) : ViewModel() {
+    private val watchlistRepository: IWatchlistRepository
+) : ViewModel() {
 
     private val _movie = MutableStateFlow<Movie?>(null)
     val movie: StateFlow<Movie?> = _movie
@@ -35,6 +36,9 @@ class MovieDetailsViewModel @Inject constructor(
     val messageAnimation: StateFlow<Int> = _messageAnimation
     private val _canRetry = MutableStateFlow(false)
     val canRetry: StateFlow<Boolean> = _canRetry
+
+    private val _isInWatchlist = MutableStateFlow(false)
+    val isInWatchlist: StateFlow<Boolean> = _isInWatchlist
 
     fun getMovieDetails(movieId: Int) = viewModelScope.launch {
         try {
@@ -67,6 +71,7 @@ class MovieDetailsViewModel @Inject constructor(
 
     fun addToWatchList() {
         viewModelScope.launch(Dispatchers.IO) {
+            _isInWatchlist.value = true
             movie.value?.let { watchlistRepository.addMovie(it) }
         }
     }
@@ -74,5 +79,22 @@ class MovieDetailsViewModel @Inject constructor(
     fun setMovie(movie: Movie) {
         _showDetailsLoader.value = false
         _movie.value = movie
+        checkIfInWatchlist(movieId = movie.id)
+    }
+
+    fun removeFromWatchlist() {
+        viewModelScope.launch(Dispatchers.IO) {
+            movie.value?.let {
+                watchlistRepository.deleteMovie(it.id)
+                _isInWatchlist.value = false
+            }
+        }
+    }
+
+    fun checkIfInWatchlist(movieId: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val movie = watchlistRepository.getMovieDetails(movieId)
+            _isInWatchlist.value = movie != null
+        }
     }
 }

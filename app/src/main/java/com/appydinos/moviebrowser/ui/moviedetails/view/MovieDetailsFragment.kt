@@ -50,9 +50,12 @@ class MovieDetailsFragment : Fragment() {
     ): View {
         binding = FragmentMovieDetailsBinding.inflate(inflater, container, false)
         binding.viewModel = viewModel
-
         binding.lifecycleOwner = viewLifecycleOwner
         binding.movieDetailsToolbar.title = "Details"
+
+        binding.messageRetryButton.setOnClickListener {
+            viewModel.getMovieDetails(getMovieId())
+        }
 
         binding.movieDetailsToolbar.inflateMenu(R.menu.details_menu)
         binding.movieDetailsToolbar.setOnMenuItemClickListener { item ->
@@ -66,13 +69,15 @@ class MovieDetailsFragment : Fragment() {
                     context?.showShortToast("Movie added to Watchlist")
                     true
                 }
+                R.id.remove_from_watchlist -> {
+                    viewModel.removeFromWatchlist()
+                    context?.showShortToast("Movie removed from Watchlist")
+                    true
+                }
                 else -> {
                     false
                 }
             }
-        }
-        binding.messageRetryButton.setOnClickListener {
-            viewModel.getMovieDetails(getMovieId())
         }
 
         Insetter.builder()
@@ -89,8 +94,11 @@ class MovieDetailsFragment : Fragment() {
             null
         }
         if (movie == null) {
-            viewModel.getMovieDetails(getMovieId())
+            val movieId = getMovieId()
+            monitorWatchlistStatus(movieId)
+            viewModel.getMovieDetails(movieId)
         } else {
+            monitorWatchlistStatus(movie.id)
             viewModel.setMovie(movie)
         }
         return binding.root
@@ -98,6 +106,21 @@ class MovieDetailsFragment : Fragment() {
 
     private fun getMovieId(): Int {
         return arguments?.get("itemId") as? Int ?: -1
+    }
+
+    private fun monitorWatchlistStatus(movieId: Int) {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.isInWatchlist.collect { isInWatchlist ->
+                    viewModel.checkIfInWatchlist(movieId)
+                    //Add to watchlist menu item
+                    binding.movieDetailsToolbar.menu.getItem(2).isVisible = !isInWatchlist
+                    //Remove from watchlist menu item
+                    binding.movieDetailsToolbar.menu.getItem(3).isVisible = isInWatchlist
+
+                }
+            }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

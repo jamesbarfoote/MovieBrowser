@@ -9,5 +9,6 @@
     <string name="watchlist">Watchlist</string>
     <string name="settings_title">Settings</string>
     <string name="add_to_watchlist">Add to Watchlist</string>
+    <string name="remove_from_watchlist">Remove from Watchlist</string>
     <string name="delete">Delete</string>
 </resources>

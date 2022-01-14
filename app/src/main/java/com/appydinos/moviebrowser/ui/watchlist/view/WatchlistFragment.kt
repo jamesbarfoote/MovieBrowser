@@ -57,7 +57,7 @@ class WatchlistFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        lifecycleScope.launchWhenCreated {
+        lifecycleScope.launchWhenStarted {
             viewModel.watchList.collectLatest {
                 watchlistAdapter.submitData(it.map { watchlist -> watchlist.movie })
             }
