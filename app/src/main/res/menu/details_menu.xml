@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item android:id="@+id/oss_licenses"
-        android:title="@string/oss_licenses" />
-
-    <item android:id="@+id/data_from"
-        android:title="@string/data_from" />
 
     <item android:id="@+id/add_to_watchlist"
         android:icon="@drawable/ic_add_to_watchlist"

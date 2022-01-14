@@ -4,7 +4,6 @@
     <string name="rating">Rating</string>
     <string name="retry">Retry</string>
     <string name="oss_licenses">Open Source Licenses</string>
-    <string name="data_from">Data from themoviedb.org</string>
     <string name="title_movies">Movies</string>
     <string name="watchlist">Watchlist</string>
     <string name="settings_title">Settings</string>
@@ -12,4 +11,6 @@
     <string name="remove_from_watchlist">Remove from Watchlist</string>
     <string name="delete">Delete</string>
     <string name="no_watchlist_yet">No movies in your Watchlist yet… Start adding and they will appear here</string>
+    <string name="data_from_tmdb">All movie data provided by The Movie Database (TMDB) themoviedb.org</string>
+    <string name="tmdp_url">https://www.themoviedb.org/</string>
 </resources>

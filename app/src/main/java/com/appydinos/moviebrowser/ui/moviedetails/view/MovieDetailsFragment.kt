@@ -1,6 +1,5 @@
 package com.appydinos.moviebrowser.ui.moviedetails.view
 
-import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -25,7 +24,6 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
-import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import dagger.hilt.android.AndroidEntryPoint
 import dev.chrisbanes.insetter.Insetter
 import dev.chrisbanes.insetter.windowInsetTypesOf
@@ -61,10 +59,6 @@ class MovieDetailsFragment : Fragment() {
         binding.movieDetailsToolbar.inflateMenu(R.menu.details_menu)
         binding.movieDetailsToolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
-                R.id.oss_licenses -> {
-                    startActivity(Intent(requireContext(), OssLicensesMenuActivity::class.java))
-                    true
-                }
                 R.id.add_to_watchlist -> {
                     viewModel.addToWatchList()
                     context?.showShortToast("Movie added to Watchlist")
@@ -115,9 +109,9 @@ class MovieDetailsFragment : Fragment() {
                 viewModel.isInWatchlist.collect { isInWatchlist ->
                     viewModel.checkIfInWatchlist(movieId)
                     //Add to watchlist menu item
-                    binding.movieDetailsToolbar.menu.getItem(2).isVisible = !isInWatchlist
+                    binding.movieDetailsToolbar.menu.getItem(0).isVisible = !isInWatchlist
                     //Remove from watchlist menu item
-                    binding.movieDetailsToolbar.menu.getItem(3).isVisible = isInWatchlist
+                    binding.movieDetailsToolbar.menu.getItem(1).isVisible = isInWatchlist
 
                 }
             }

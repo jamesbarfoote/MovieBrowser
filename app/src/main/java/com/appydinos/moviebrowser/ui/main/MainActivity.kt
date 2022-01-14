@@ -52,7 +52,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.navigation_settings -> {
                     Timber.v("navigation_settings")
-                    Navigation.findNavController(this, R.id.nav_host_fragment).navigate(R.id.movieListFragment)
+                    Navigation.findNavController(this, R.id.nav_host_fragment).navigate(R.id.settingsFragment)
                     true
                 }
                 else -> false
