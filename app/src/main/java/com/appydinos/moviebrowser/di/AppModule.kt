@@ -1,15 +1,15 @@
 package com.appydinos.moviebrowser.di
 
+import android.app.Application
+import androidx.room.Room
 import com.appydinos.moviebrowser.data.auth.Auth
 import com.appydinos.moviebrowser.data.auth.IAuth
-import com.appydinos.moviebrowser.data.repo.IMoviesRepository
-import com.appydinos.moviebrowser.data.repo.MovieService
-import com.appydinos.moviebrowser.data.repo.MoviesRepository
+import com.appydinos.moviebrowser.data.db.AppDatabase
+import com.appydinos.moviebrowser.data.repo.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -54,7 +54,21 @@ object AppModule {
 
     @Singleton
     @Provides
+    fun provideWatchlistRepository(database: AppDatabase): IWatchlistRepository {
+        return WatchlistRepository(appDatabase = database)
+    }
+
+    @Singleton
+    @Provides
     fun provideMoviesRepository(service: MovieService): IMoviesRepository {
         return MoviesRepository(api = service)
+    }
+
+    @Provides
+    fun provideItemDatabase(context: Application): AppDatabase {
+        return Room.databaseBuilder(
+            context,
+            AppDatabase::class.java,
+            "Movie_Browser_DB").build()
     }
 }

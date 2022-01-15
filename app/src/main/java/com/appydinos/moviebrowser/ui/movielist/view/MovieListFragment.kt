@@ -7,16 +7,13 @@ import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.core.os.bundleOf
 import androidx.core.view.doOnNextLayout
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.*
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.NavOptions
-import androidx.navigation.fragment.NavHostFragment
 import androidx.paging.LoadState
 import androidx.slidingpanelayout.widget.SlidingPaneLayout
 import com.appydinos.moviebrowser.R
 import com.appydinos.moviebrowser.databinding.FragmentMovieListBinding
+import com.appydinos.moviebrowser.ui.moviedetails.view.MovieDetailsFragment
 import com.appydinos.moviebrowser.ui.movielist.adapter.MoviesAdapter
 import com.appydinos.moviebrowser.ui.movielist.adapter.MoviesLoadStateAdapter
 import com.appydinos.moviebrowser.ui.movielist.viewmodel.MovieListViewModel
@@ -73,25 +70,17 @@ class MovieListFragment : Fragment() {
     }
 
     private fun openDetails(itemId: Int, binding: FragmentMovieListBinding) {
-        val navHostFragment =
-            childFragmentManager.findFragmentById(R.id.detail_container) as NavHostFragment
-        val navController = navHostFragment.navController
-        navController.navigate(
-            R.id.movieDetailsFragment,
-            bundleOf("id" to itemId),
-            NavOptions.Builder()
-                // Pop all destinations off the back stack.
-                .setPopUpTo(navController.graph.startDestination, true)
-                .apply {
-                    // If we're already open and the detail pane is visible,
-                    // crossfade between the destinations.
-                    if (binding.slidingPaneLayout.isOpen) {
-                        setEnterAnim(androidx.navigation.ui.R.animator.nav_default_enter_anim)
-                        setExitAnim(androidx.navigation.ui.R.animator.nav_default_exit_anim)
-                    }
-                }
-                .build()
-        )
+        childFragmentManager.commit {
+            setReorderingAllowed(true)
+            replace(
+                R.id.detail_container,
+                MovieDetailsFragment::class.java,
+                bundleOf("itemId" to itemId))
+            if (binding.slidingPaneLayout.isOpen) {
+                setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+            }
+        }
+
         binding.slidingPaneLayout.open()
     }
 

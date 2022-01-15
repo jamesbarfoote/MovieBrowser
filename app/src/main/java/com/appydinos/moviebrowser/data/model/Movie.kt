@@ -1,24 +1,28 @@
 package com.appydinos.moviebrowser.data.model
 
+import android.os.Parcelable
+import androidx.room.ColumnInfo
 import com.appydinos.moviebrowser.extensions.toHoursAndMinutes
+import kotlinx.parcelize.Parcelize
 import timber.log.Timber
 import java.time.LocalDate
 
 private const val POSTER_BASE_URL = "https://image.tmdb.org/t/p/w500"
 
+@Parcelize
 data class Movie(
-    val id: Int,
+    @ColumnInfo(name = "movie_id") val id: Int,
     val title: String,
     val description: String,
     val posterURL: String,
     val releaseDate: String,
     val rating: Double,
-    val genre: List<String>? = null,
+    val genre: List<String> = arrayListOf(),
     val runTime: String = "",
     val status: String = "",
     val tagLine: String = "",
     val votes: Int
-) {
+): Parcelable {
     fun getFullTitleText(): String {
         val year = try {
             "(${ LocalDate.parse(releaseDate).year })"
@@ -30,7 +34,7 @@ data class Movie(
     }
 
     fun getInfoText(): String {
-        val genreText = genre?.let { "| ${ it.joinToString(", ") }" } ?: ""
+        val genreText = if (!genre.isNullOrEmpty()) genre.let { "| ${ it.joinToString(", ") }" } else ""
         return "$runTime | $releaseDate $genreText"
     }
 

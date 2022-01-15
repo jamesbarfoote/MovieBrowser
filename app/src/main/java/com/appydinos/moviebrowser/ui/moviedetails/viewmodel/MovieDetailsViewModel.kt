@@ -5,16 +5,23 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.appydinos.moviebrowser.R
 import com.appydinos.moviebrowser.data.model.Movie
+import com.appydinos.moviebrowser.data.repo.IWatchlistRepository
 import com.appydinos.moviebrowser.data.repo.MoviesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
-class MovieDetailsViewModel @Inject constructor(private val repository: MoviesRepository) : ViewModel() {
+class MovieDetailsViewModel @Inject constructor(
+    private val repository: MoviesRepository,
+    private val watchlistRepository: IWatchlistRepository
+) : ViewModel() {
+
     private val _movie = MutableStateFlow<Movie?>(null)
     val movie: StateFlow<Movie?> = _movie
 
@@ -30,6 +37,9 @@ class MovieDetailsViewModel @Inject constructor(private val repository: MoviesRe
     val messageAnimation: StateFlow<Int> = _messageAnimation
     private val _canRetry = MutableStateFlow(false)
     val canRetry: StateFlow<Boolean> = _canRetry
+
+    private val _isInWatchlist = MutableStateFlow(false)
+    val isInWatchlist: StateFlow<Boolean> = _isInWatchlist
 
     fun getMovieDetails(movieId: Int) = viewModelScope.launch {
         try {
@@ -58,5 +68,28 @@ class MovieDetailsViewModel @Inject constructor(private val repository: MoviesRe
         _messageText.value = errorMessage
         _messageAnimation.value = animation
         _canRetry.value = canRetry
+    }
+
+    suspend fun addToWatchList() = withContext(Dispatchers.IO) {
+        _isInWatchlist.value = true
+        movie.value?.let { watchlistRepository.addMovie(it) }
+    }
+
+    suspend fun setMovie(movie: Movie) = withContext(Dispatchers.IO) {
+        _showDetailsLoader.value = false
+        _movie.value = movie
+        checkIfInWatchlist(movieId = movie.id)
+    }
+
+    suspend fun removeFromWatchlist() = withContext(Dispatchers.IO) {
+        movie.value?.let {
+            watchlistRepository.deleteMovie(it.id)
+            _isInWatchlist.value = false
+        }
+    }
+
+    suspend fun checkIfInWatchlist(movieId: Int) = withContext(Dispatchers.IO) {
+        val movie = watchlistRepository.getMovieDetails(movieId)
+        _isInWatchlist.value = movie != null
     }
 }

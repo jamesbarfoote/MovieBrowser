@@ -8,6 +8,7 @@ import com.appydinos.moviebrowser.data.model.Movie
 import com.appydinos.moviebrowser.databinding.MovieItemBinding
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade
+import com.bumptech.glide.request.target.Target
 
 /**
  * [RecyclerView.Adapter] that can display a [Movie].
@@ -37,6 +38,7 @@ class MyMovieRecyclerViewAdapter(
         Glide.with(image)
             .load(movie.posterURL)
             .transition(withCrossFade())
+            .override(Target.SIZE_ORIGINAL)
             .into(image)
 
         title.text = movie.title

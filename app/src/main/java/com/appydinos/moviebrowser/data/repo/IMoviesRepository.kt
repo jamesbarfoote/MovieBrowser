@@ -8,5 +8,4 @@ interface IMoviesRepository {
     fun getNowPlayingMovies(pageSize: Int): Flow<PagingData<Movie>>
 
     suspend fun getMovieDetails(movieId: Int): Movie?
-
 }

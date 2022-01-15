@@ -1,6 +1,5 @@
 package com.appydinos.moviebrowser.ui.moviedetails.view
 
-import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -16,6 +15,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.navArgs
 import com.appydinos.moviebrowser.R
 import com.appydinos.moviebrowser.databinding.FragmentMovieDetailsBinding
+import com.appydinos.moviebrowser.extensions.showShortToast
 import com.appydinos.moviebrowser.ui.moviedetails.viewmodel.MovieDetailsViewModel
 import com.appydinos.moviebrowser.ui.movielist.viewmodel.MoviesSlidingPaneViewModel
 import com.bumptech.glide.Glide
@@ -23,9 +23,10 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestListener
-import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
+import com.bumptech.glide.request.target.Target
 import dagger.hilt.android.AndroidEntryPoint
 import dev.chrisbanes.insetter.Insetter
+import dev.chrisbanes.insetter.Side
 import dev.chrisbanes.insetter.windowInsetTypesOf
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
@@ -36,6 +37,7 @@ class MovieDetailsFragment : Fragment() {
     private lateinit var binding: FragmentMovieDetailsBinding
     private val viewModel: MovieDetailsViewModel by viewModels()
     private val movieSlidingPaneViewModel: MoviesSlidingPaneViewModel by activityViewModels()
+    private var isFromWatchlist: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,15 +50,28 @@ class MovieDetailsFragment : Fragment() {
     ): View {
         binding = FragmentMovieDetailsBinding.inflate(inflater, container, false)
         binding.viewModel = viewModel
-
         binding.lifecycleOwner = viewLifecycleOwner
         binding.movieDetailsToolbar.title = "Details"
+
+        binding.messageRetryButton.setOnClickListener {
+            viewModel.getMovieDetails(getMovieId())
+        }
 
         binding.movieDetailsToolbar.inflateMenu(R.menu.details_menu)
         binding.movieDetailsToolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
-                R.id.oss_licenses -> {
-                    startActivity(Intent(requireContext(), OssLicensesMenuActivity::class.java))
+                R.id.add_to_watchlist -> {
+                    viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+                        viewModel.addToWatchList()
+                    }
+                    context?.showShortToast("Movie added to Watchlist")
+                    true
+                }
+                R.id.remove_from_watchlist -> {
+                    viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+                        viewModel.removeFromWatchlist()
+                    }
+                    context?.showShortToast("Movie removed from Watchlist")
                     true
                 }
                 else -> {
@@ -64,31 +79,48 @@ class MovieDetailsFragment : Fragment() {
                 }
             }
         }
-        binding.messageRetryButton.setOnClickListener {
-            viewModel.getMovieDetails(getMovieId())
-        }
 
         Insetter.builder()
-            .padding(windowInsetTypesOf(navigationBars = true))
-            .margin(windowInsetTypesOf(statusBars = false))
-            .applyToView(binding.detailsView)
-
-        Insetter.builder()
-            .margin(windowInsetTypesOf(statusBars = true))
-            .padding(windowInsetTypesOf(navigationBars = false))
-            .paddingRight(windowInsetTypesOf(navigationBars = true))
+            .padding(windowInsetTypesOf(statusBars = true))
+            .padding(windowInsetTypesOf(navigationBars = true), sides = Side.RIGHT)
             .applyToView(binding.root)
 
-        viewModel.getMovieDetails(getMovieId())
+        val movie = try {
+            val args: MovieDetailsFragmentArgs by navArgs()
+            isFromWatchlist = args.origin == "Watchlist"
+            args.movie
+        } catch (ex: java.lang.Exception) {
+            null
+        }
+        if (movie == null) {
+            val movieId = getMovieId()
+            monitorWatchlistStatus(movieId)
+            viewModel.getMovieDetails(movieId)
+        } else {
+            monitorWatchlistStatus(movie.id)
+            viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+                viewModel.setMovie(movie)
+            }
+        }
         return binding.root
     }
 
     private fun getMovieId(): Int {
-        return try {
-            val args: MovieDetailsFragmentArgs by navArgs()
-            args.id
-        } catch (ex: Exception) {
-            -1
+        return arguments?.get("itemId") as? Int ?: -1
+    }
+
+    private fun monitorWatchlistStatus(movieId: Int) {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.isInWatchlist.collect { isInWatchlist ->
+                    viewModel.checkIfInWatchlist(movieId)
+                    //Add to watchlist menu item
+                    binding.movieDetailsToolbar.menu.getItem(0).isVisible = !isInWatchlist
+                    //Remove from watchlist menu item
+                    binding.movieDetailsToolbar.menu.getItem(1).isVisible = isInWatchlist
+
+                }
+            }
         }
     }
 
@@ -101,6 +133,7 @@ class MovieDetailsFragment : Fragment() {
                     Glide.with(requireContext())
                         .load(movie?.posterURL)
                         .transition(DrawableTransitionOptions.withCrossFade())
+                        .override(Target.SIZE_ORIGINAL)
                         .addListener(object : RequestListener<Drawable> {
                             override fun onLoadFailed(
                                 e: GlideException?,
@@ -147,7 +180,7 @@ class MovieDetailsFragment : Fragment() {
             movieSlidingPaneViewModel.isTwoPane
                 .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
                 .collectLatest { isTwoPane ->
-                    if (!isTwoPane) {
+                    if (!isTwoPane || isFromWatchlist) {
                         binding.movieDetailsToolbar.setNavigationIcon(R.drawable.ic_round_arrow_back_24)
                         binding.movieDetailsToolbar.setNavigationOnClickListener {
                             requireActivity().onBackPressed()
