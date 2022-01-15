@@ -1,7 +1,10 @@
-package com.appydinos.moviebrowser.data.dp
+package com.appydinos.moviebrowser.data.db
 
 import androidx.paging.PagingSource
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
 import com.appydinos.moviebrowser.data.model.Movie
 
 @Dao

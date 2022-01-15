@@ -1,11 +1,10 @@
-package com.appydinos.moviebrowser.data.dp
+package com.appydinos.moviebrowser.data.db
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.appydinos.moviebrowser.data.model.Movie
 
 @Database(entities = [WatchlistItem::class], version = 1, exportSchema = false)
 @TypeConverters(Converters::class)

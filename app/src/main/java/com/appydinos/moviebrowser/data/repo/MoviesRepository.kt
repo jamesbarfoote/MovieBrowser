@@ -3,7 +3,6 @@ package com.appydinos.moviebrowser.data.repo
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import com.appydinos.moviebrowser.data.dp.AppDatabase
 import com.appydinos.moviebrowser.data.model.Movie
 import com.appydinos.moviebrowser.data.model.toMovie
 import kotlinx.coroutines.flow.Flow

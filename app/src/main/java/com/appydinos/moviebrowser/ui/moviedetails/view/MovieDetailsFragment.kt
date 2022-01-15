@@ -26,6 +26,7 @@ import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import dagger.hilt.android.AndroidEntryPoint
 import dev.chrisbanes.insetter.Insetter
+import dev.chrisbanes.insetter.Side
 import dev.chrisbanes.insetter.windowInsetTypesOf
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
@@ -60,12 +61,16 @@ class MovieDetailsFragment : Fragment() {
         binding.movieDetailsToolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.add_to_watchlist -> {
-                    viewModel.addToWatchList()
+                    viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+                        viewModel.addToWatchList()
+                    }
                     context?.showShortToast("Movie added to Watchlist")
                     true
                 }
                 R.id.remove_from_watchlist -> {
-                    viewModel.removeFromWatchlist()
+                    viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+                        viewModel.removeFromWatchlist()
+                    }
                     context?.showShortToast("Movie removed from Watchlist")
                     true
                 }
@@ -76,9 +81,8 @@ class MovieDetailsFragment : Fragment() {
         }
 
         Insetter.builder()
-            .margin(windowInsetTypesOf(statusBars = true))
-            .padding(windowInsetTypesOf(navigationBars = false))
-            .paddingRight(windowInsetTypesOf(navigationBars = false))
+            .padding(windowInsetTypesOf(statusBars = true))
+            .padding(windowInsetTypesOf(navigationBars = true), sides = Side.RIGHT)
             .applyToView(binding.root)
 
         val movie = try {
@@ -94,7 +98,9 @@ class MovieDetailsFragment : Fragment() {
             viewModel.getMovieDetails(movieId)
         } else {
             monitorWatchlistStatus(movie.id)
-            viewModel.setMovie(movie)
+            viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+                viewModel.setMovie(movie)
+            }
         }
         return binding.root
     }

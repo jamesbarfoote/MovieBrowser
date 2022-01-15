@@ -12,7 +12,7 @@
         android:padding="16dp">
 
         <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/tmdp_logo"
+            android:id="@+id/tmdb_logo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="24dp"
@@ -22,7 +22,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/tmdp_attribution_text"
+            android:id="@+id/tmdb_attribution_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="8dp"
@@ -30,7 +30,7 @@
             android:textAlignment="center"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tmdp_logo" />
+            app:layout_constraintTop_toBottomOf="@id/tmdb_logo" />
 
         <Button
             android:id="@+id/oss_licenses"
@@ -41,7 +41,8 @@
             android:textAllCaps="false"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tmdp_attribution_text" />
+            app:layout_constraintTop_toBottomOf="@+id/tmdb_attribution_text" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 </ScrollView>

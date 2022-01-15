@@ -1,4 +1,4 @@
-package com.appydinos.moviebrowser.data.dp
+package com.appydinos.moviebrowser.data.db
 
 import androidx.room.*
 import com.appydinos.moviebrowser.data.model.Movie

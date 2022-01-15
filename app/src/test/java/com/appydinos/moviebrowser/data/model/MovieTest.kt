@@ -44,7 +44,7 @@ class MovieTest {
     @Test
     fun `getInfoText - returns info correctly when no genre`() {
         //When
-        val info = testMovie.copy(genre = null).getInfoText()
+        val info = testMovie.copy(genre = listOf()).getInfoText()
 
         //Then
         assertEquals("1h 37m | 2021-11-04 ", info)
@@ -139,7 +139,7 @@ val freeGuyMovieList = Movie(
     posterURL = "https://image.tmdb.org/t/p/w500/freeguy.img",
     releaseDate = "2021-08-11",
     rating = 7.8,
-    genre = null,
+    genre = listOf(),
     runTime = "",
     status = "",
     votes = 4038

@@ -11,7 +11,7 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withC
 import com.bumptech.glide.request.target.Target
 
 /**
- * [RecyclerView.Adapter] that can display a [Movie].
+ * [RecyclerView.Adapter] that can display a watchlisted [Movie].
  */
 class WatchlistRecyclerViewAdapter(
     binding: WatchlistItemBinding,

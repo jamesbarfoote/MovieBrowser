@@ -4,12 +4,12 @@
 
     <item android:id="@+id/add_to_watchlist"
         android:icon="@drawable/ic_add_to_watchlist"
-        app:showAsAction="always"
+        app:showAsAction="ifRoom"
         android:title="@string/add_to_watchlist" />
 
     <item android:id="@+id/remove_from_watchlist"
         android:icon="@drawable/ic_remove_from_watchlist"
-        app:showAsAction="always"
+        app:showAsAction="ifRoom"
         android:visible="false"
         android:title="@string/remove_from_watchlist" />
 </menu>

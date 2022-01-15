@@ -8,7 +8,6 @@ import com.appydinos.moviebrowser.data.model.Movie
 import com.appydinos.moviebrowser.data.repo.IWatchlistRepository
 import com.appydinos.moviebrowser.data.repo.MoviesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -69,32 +68,26 @@ class MovieDetailsViewModel @Inject constructor(
         _canRetry.value = canRetry
     }
 
-    fun addToWatchList() {
-        viewModelScope.launch(Dispatchers.IO) {
-            _isInWatchlist.value = true
-            movie.value?.let { watchlistRepository.addMovie(it) }
-        }
+    suspend fun addToWatchList() {
+        _isInWatchlist.value = true
+        movie.value?.let { watchlistRepository.addMovie(it) }
     }
 
-    fun setMovie(movie: Movie) {
+    suspend fun setMovie(movie: Movie) {
         _showDetailsLoader.value = false
         _movie.value = movie
         checkIfInWatchlist(movieId = movie.id)
     }
 
-    fun removeFromWatchlist() {
-        viewModelScope.launch(Dispatchers.IO) {
-            movie.value?.let {
-                watchlistRepository.deleteMovie(it.id)
-                _isInWatchlist.value = false
-            }
+    suspend fun removeFromWatchlist() {
+        movie.value?.let {
+            watchlistRepository.deleteMovie(it.id)
+            _isInWatchlist.value = false
         }
     }
 
-    fun checkIfInWatchlist(movieId: Int) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val movie = watchlistRepository.getMovieDetails(movieId)
-            _isInWatchlist.value = movie != null
-        }
+    suspend fun checkIfInWatchlist(movieId: Int) {
+        val movie = watchlistRepository.getMovieDetails(movieId)
+        _isInWatchlist.value = movie != null
     }
 }

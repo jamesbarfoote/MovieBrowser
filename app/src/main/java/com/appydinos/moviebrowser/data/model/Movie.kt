@@ -2,13 +2,10 @@ package com.appydinos.moviebrowser.data.model
 
 import android.os.Parcelable
 import androidx.room.ColumnInfo
-import androidx.room.Entity
-import androidx.room.PrimaryKey
 import com.appydinos.moviebrowser.extensions.toHoursAndMinutes
 import kotlinx.parcelize.Parcelize
 import timber.log.Timber
 import java.time.LocalDate
-import java.util.*
 
 private const val POSTER_BASE_URL = "https://image.tmdb.org/t/p/w500"
 
@@ -37,7 +34,7 @@ data class Movie(
     }
 
     fun getInfoText(): String {
-        val genreText = genre?.let { "| ${ it.joinToString(", ") }" } ?: ""
+        val genreText = if (!genre.isNullOrEmpty()) genre.let { "| ${ it.joinToString(", ") }" } else ""
         return "$runTime | $releaseDate $genreText"
     }
 

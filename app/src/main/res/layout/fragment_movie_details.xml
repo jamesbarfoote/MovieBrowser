@@ -36,7 +36,8 @@
         android:id="@+id/message_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:visibility="@{viewModel.showMessageView}">
+        app:visibility="@{viewModel.showMessageView}"
+        tools:visibility="gone">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -109,6 +110,7 @@
                 android:id="@+id/moviePoster"
                 android:layout_width="wrap_content"
                 android:layout_height="350dp"
+                android:adjustViewBounds="true"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"

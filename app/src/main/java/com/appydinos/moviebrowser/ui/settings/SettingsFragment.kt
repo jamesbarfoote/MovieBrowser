@@ -16,17 +16,13 @@ import dev.chrisbanes.insetter.windowInsetTypesOf
 
 class SettingsFragment : Fragment() {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         val view = FragmentSettingsBinding.inflate(inflater, container, false)
 
-        view.tmdpLogo.setOnClickListener {
+        view.tmdbLogo.setOnClickListener {
             try {
                 val webpage: Uri = Uri.parse(getString(R.string.tmdp_url))
                 val intent = Intent(Intent.ACTION_VIEW, webpage)

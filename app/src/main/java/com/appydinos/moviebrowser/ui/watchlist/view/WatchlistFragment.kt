@@ -17,12 +17,12 @@ import com.appydinos.moviebrowser.ui.watchlist.viewmodel.WatchlistViewModel
 import com.google.android.flexbox.*
 import dagger.hilt.android.AndroidEntryPoint
 import dev.chrisbanes.insetter.Insetter
+import dev.chrisbanes.insetter.Side
 import dev.chrisbanes.insetter.windowInsetTypesOf
 import kotlinx.coroutines.flow.collectLatest
 
-
 /**
- * A simple screen that shows the users watch listed items
+ * A simple screen that shows the users watch listed movies
  */
 @AndroidEntryPoint
 class WatchlistFragment : Fragment() {
@@ -44,9 +44,20 @@ class WatchlistFragment : Fragment() {
         binding.list.layoutManager = layoutManager
 
         watchlistAdapter = WatchlistAdapter(onSelect = { selectedMovie ->
-            findNavController().navigate(WatchlistFragmentDirections.actionWatchlistFragmentToMovieDetailsFragment(movie = selectedMovie, origin = "Watchlist"))
+            findNavController().navigate(
+                WatchlistFragmentDirections.actionWatchlistFragmentToMovieDetailsFragment(
+                    movie = selectedMovie,
+                    origin = "Watchlist"
+                )
+            )
         }) { selectedMovie ->
-            watchlistBottomSheet = WatchlistBottomSheet.newInstance(selectedMovie.title) { viewModel.deleteMovie(selectedMovie.id) }.also {
+            watchlistBottomSheet = WatchlistBottomSheet.newInstance(selectedMovie.title) {
+                viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+                    viewModel.deleteMovie(
+                        selectedMovie.id
+                    )
+                }
+            }.also {
                 it.show(childFragmentManager, WatchlistBottomSheet.TAG)
             }
         }
@@ -64,8 +75,7 @@ class WatchlistFragment : Fragment() {
 
         Insetter.builder()
             .margin(windowInsetTypesOf(statusBars = true))
-            .padding(windowInsetTypesOf(navigationBars = false))
-            .paddingRight(windowInsetTypesOf(navigationBars = false))
+            .padding(windowInsetTypesOf(navigationBars = true), sides = Side.RIGHT)
             .applyToView(binding.root)
 
         return binding.root

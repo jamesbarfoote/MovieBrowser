@@ -4,14 +4,12 @@ import android.app.Application
 import androidx.room.Room
 import com.appydinos.moviebrowser.data.auth.Auth
 import com.appydinos.moviebrowser.data.auth.IAuth
-import com.appydinos.moviebrowser.data.dp.AppDatabase
+import com.appydinos.moviebrowser.data.db.AppDatabase
 import com.appydinos.moviebrowser.data.repo.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.scopes.ViewModelScoped
 import dagger.hilt.components.SingletonComponent
-import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -71,6 +69,6 @@ object AppModule {
         return Room.databaseBuilder(
             context,
             AppDatabase::class.java,
-            "db_item").build()
+            "Movie_Browser_DB").build()
     }
 }

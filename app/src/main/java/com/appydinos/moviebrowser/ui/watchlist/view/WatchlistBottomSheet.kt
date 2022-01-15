@@ -8,7 +8,7 @@ import com.appydinos.moviebrowser.R
 import com.appydinos.moviebrowser.databinding.WatchlistBottomSheetBinding
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
-class WatchlistBottomSheet: BottomSheetDialogFragment() {
+class WatchlistBottomSheet : BottomSheetDialogFragment() {
 
     private var movieTitle: String = ""
     private var onDelete: () -> Unit = {}

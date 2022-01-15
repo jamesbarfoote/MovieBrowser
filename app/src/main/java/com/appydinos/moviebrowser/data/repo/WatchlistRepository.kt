@@ -3,8 +3,8 @@ package com.appydinos.moviebrowser.data.repo
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import com.appydinos.moviebrowser.data.dp.AppDatabase
-import com.appydinos.moviebrowser.data.dp.WatchlistItem
+import com.appydinos.moviebrowser.data.db.AppDatabase
+import com.appydinos.moviebrowser.data.db.WatchlistItem
 import com.appydinos.moviebrowser.data.model.Movie
 import kotlinx.coroutines.flow.Flow
 import java.util.*
