@@ -120,5 +120,4 @@ class AppDatabaseTest {
         assertEquals(null, watchlistDao.getMovie(2))
         assertEquals(watchlistItemTwo.movie, watchlistDao.getMovie(1))
     }
-
 }

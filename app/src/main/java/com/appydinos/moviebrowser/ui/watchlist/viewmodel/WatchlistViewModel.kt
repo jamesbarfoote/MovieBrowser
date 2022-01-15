@@ -6,14 +6,16 @@ import androidx.paging.cachedIn
 import com.appydinos.moviebrowser.data.db.WatchlistItem
 import com.appydinos.moviebrowser.data.repo.IWatchlistRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
 class WatchlistViewModel @Inject constructor(private val watchlistRepository: IWatchlistRepository): ViewModel() {
-    suspend fun deleteMovie(id: Int) {
+    suspend fun deleteMovie(id: Int) = withContext(Dispatchers.IO) {
         watchlistRepository.deleteMovie(id)
     }
 

@@ -8,9 +8,11 @@ import com.appydinos.moviebrowser.data.model.Movie
 import com.appydinos.moviebrowser.data.repo.IWatchlistRepository
 import com.appydinos.moviebrowser.data.repo.MoviesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -68,25 +70,25 @@ class MovieDetailsViewModel @Inject constructor(
         _canRetry.value = canRetry
     }
 
-    suspend fun addToWatchList() {
+    suspend fun addToWatchList() = withContext(Dispatchers.IO) {
         _isInWatchlist.value = true
         movie.value?.let { watchlistRepository.addMovie(it) }
     }
 
-    suspend fun setMovie(movie: Movie) {
+    suspend fun setMovie(movie: Movie) = withContext(Dispatchers.IO) {
         _showDetailsLoader.value = false
         _movie.value = movie
         checkIfInWatchlist(movieId = movie.id)
     }
 
-    suspend fun removeFromWatchlist() {
+    suspend fun removeFromWatchlist() = withContext(Dispatchers.IO) {
         movie.value?.let {
             watchlistRepository.deleteMovie(it.id)
             _isInWatchlist.value = false
         }
     }
 
-    suspend fun checkIfInWatchlist(movieId: Int) {
+    suspend fun checkIfInWatchlist(movieId: Int) = withContext(Dispatchers.IO) {
         val movie = watchlistRepository.getMovieDetails(movieId)
         _isInWatchlist.value = movie != null
     }
