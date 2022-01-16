@@ -24,6 +24,8 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
+      - name: Add Auth file
+        run: echo ${{ secrets.AUTH_CLASS }} | base64 -d > app/src/main/java/com/appydinos/moviebrowser/data/auth/Auth.kt
       - name: Unit tests
         run: bash ./gradlew test --stacktrace
 
@@ -37,6 +39,8 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
+      - name: Add Auth file
+        run: echo ${{ secrets.AUTH_CLASS }} | base64 -d > app/src/main/java/com/appydinos/moviebrowser/data/auth/Auth.kt
       - name: Build debug APK
         run: bash ./gradlew assembleDebug --stacktrace
       - name: Upload APK
