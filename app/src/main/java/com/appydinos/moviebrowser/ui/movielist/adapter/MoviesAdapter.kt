@@ -19,7 +19,7 @@ class MoviesAdapter(private var onSelect: (Movie) -> Unit): PagingDataAdapter<Mo
         payloads: MutableList<Any>
     ) {
         if (payloads.isNotEmpty()) {
-            val item = getItem(position)
+            getItem(position)
         } else {
             onBindViewHolder(holder, position)
         }

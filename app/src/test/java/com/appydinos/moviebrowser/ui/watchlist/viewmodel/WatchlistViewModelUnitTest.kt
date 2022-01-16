@@ -6,13 +6,13 @@ import com.appydinos.moviebrowser.data.db.WatchlistItem
 import com.appydinos.moviebrowser.data.model.freeGuyMovie
 import com.appydinos.moviebrowser.data.model.testMovie
 import com.appydinos.moviebrowser.data.repo.IWatchlistRepository
-import junit.framework.Assert.assertEquals
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.*
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith

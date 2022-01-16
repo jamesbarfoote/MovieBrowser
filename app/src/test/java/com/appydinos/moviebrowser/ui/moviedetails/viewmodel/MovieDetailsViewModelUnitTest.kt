@@ -178,14 +178,15 @@ class MovieDetailsViewModelUnitTest {
     }
 
     @Test
-    fun `setMovie() updated stateflow`() = runTest {
+    fun `setMovie() updates stateflow`() = runTest {
         //Given
-        viewModel.getMovieDetails(123)
+        assertEquals(null, viewModel.movie.value)
 
         //When
         viewModel.setMovie(freeGuyMovie)
 
         //Then
+        advanceUntilIdle()
         assertEquals(freeGuyMovie, viewModel.movie.value)
         assertEquals(false, viewModel.showDetailsLoader.value)
     }
