@@ -2,8 +2,12 @@
 name: CI
 
 # Controls when the action will run. Triggers the workflow on pull request
-# events
+# events and pushes to master and release
 on:
+  push:
+    branches:
+      - 'master'
+      - 'release*'
   pull_request:
     branches:
       - '*'

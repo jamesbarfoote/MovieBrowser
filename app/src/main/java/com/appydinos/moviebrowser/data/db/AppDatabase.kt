@@ -18,7 +18,7 @@ abstract class AppDatabase: RoomDatabase() {
 
         fun getInstance(context: Context): AppDatabase {
             return instance ?: synchronized(this) {
-                instance ?: Room.databaseBuilder<AppDatabase>(context.applicationContext,
+                instance ?: Room.databaseBuilder(context.applicationContext,
                     AppDatabase::class.java, "item_database")
                     .setJournalMode(JournalMode.TRUNCATE)
                     .build()

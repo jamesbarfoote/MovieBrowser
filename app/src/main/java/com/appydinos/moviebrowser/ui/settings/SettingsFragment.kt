@@ -24,7 +24,7 @@ class SettingsFragment : Fragment() {
 
         view.tmdbLogo.setOnClickListener {
             try {
-                val webpage: Uri = Uri.parse(getString(R.string.tmdp_url))
+                val webpage: Uri = Uri.parse(getString(R.string.tmdb_url))
                 val intent = Intent(Intent.ACTION_VIEW, webpage)
                 startActivity(intent)
             } catch (ex: Exception) {

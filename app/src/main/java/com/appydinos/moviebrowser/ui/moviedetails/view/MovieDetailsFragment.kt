@@ -138,7 +138,7 @@ class MovieDetailsFragment : Fragment() {
                             override fun onLoadFailed(
                                 e: GlideException?,
                                 model: Any?,
-                                target: com.bumptech.glide.request.target.Target<Drawable>?,
+                                target: Target<Drawable>?,
                                 isFirstResource: Boolean
                             ): Boolean {
                                 return false
@@ -147,7 +147,7 @@ class MovieDetailsFragment : Fragment() {
                             override fun onResourceReady(
                                 resource: Drawable?,
                                 model: Any?,
-                                target: com.bumptech.glide.request.target.Target<Drawable>?,
+                                target: Target<Drawable>?,
                                 dataSource: DataSource?,
                                 isFirstResource: Boolean
                             ): Boolean {
