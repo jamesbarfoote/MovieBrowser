@@ -12,5 +12,5 @@
     <string name="delete">Delete</string>
     <string name="no_watchlist_yet">No movies in your Watchlist yet… Start adding and they will appear here</string>
     <string name="data_from_tmdb">All movie data provided by The Movie Database (TMDB) themoviedb.org</string>
-    <string name="tmdp_url">https://www.themoviedb.org/</string>
+    <string name="tmdb_url">https://www.themoviedb.org/</string>
 </resources>

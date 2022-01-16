@@ -5,7 +5,6 @@ import com.appydinos.moviebrowser.data.db.WatchlistDao
 import com.appydinos.moviebrowser.data.db.WatchlistItem
 import com.appydinos.moviebrowser.data.model.freeGuyMovie
 import com.appydinos.moviebrowser.testextensions.capture
-import junit.framework.Assert.assertEquals
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -13,6 +12,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith

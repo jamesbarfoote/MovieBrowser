@@ -1,6 +1,5 @@
 package com.appydinos.moviebrowser.data.repo
 
-import androidx.recyclerview.widget.ListUpdateCallback
 import com.appydinos.moviebrowser.data.model.MovieResponse
 import com.appydinos.moviebrowser.data.model.freeGuyMovie
 import com.appydinos.moviebrowser.data.model.movieResponse
@@ -70,11 +69,4 @@ class MoviesRepositoryUnitTest {
         //Then
         assertEquals(null, result)
     }
-}
-
-class NoopListCallback : ListUpdateCallback {
-    override fun onChanged(position: Int, count: Int, payload: Any?) {}
-    override fun onMoved(fromPosition: Int, toPosition: Int) {}
-    override fun onInserted(position: Int, count: Int) {}
-    override fun onRemoved(position: Int, count: Int) {}
 }
