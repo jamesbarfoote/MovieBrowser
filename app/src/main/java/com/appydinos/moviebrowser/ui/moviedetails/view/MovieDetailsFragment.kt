@@ -1,40 +1,57 @@
 package com.appydinos.moviebrowser.ui.moviedetails.view
 
-import android.graphics.drawable.Drawable
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.RawRes
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.navArgs
+import coil.annotation.ExperimentalCoilApi
+import coil.compose.ImagePainter
+import coil.compose.rememberImagePainter
+import com.airbnb.lottie.compose.*
 import com.appydinos.moviebrowser.R
-import com.appydinos.moviebrowser.databinding.FragmentMovieDetailsBinding
+import com.appydinos.moviebrowser.data.model.Movie
 import com.appydinos.moviebrowser.extensions.showShortToast
+import com.appydinos.moviebrowser.ui.compose.MovieBrowserTheme
 import com.appydinos.moviebrowser.ui.moviedetails.viewmodel.MovieDetailsViewModel
 import com.appydinos.moviebrowser.ui.movielist.viewmodel.MoviesSlidingPaneViewModel
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.DataSource
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
-import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.target.Target
+import com.google.accompanist.insets.ProvideWindowInsets
+import com.google.accompanist.insets.navigationBarsPadding
+import com.google.accompanist.insets.statusBarsPadding
 import dagger.hilt.android.AndroidEntryPoint
-import dev.chrisbanes.insetter.Insetter
-import dev.chrisbanes.insetter.Side
-import dev.chrisbanes.insetter.windowInsetTypesOf
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MovieDetailsFragment : Fragment() {
-    private lateinit var binding: FragmentMovieDetailsBinding
     private val viewModel: MovieDetailsViewModel by viewModels()
     private val movieSlidingPaneViewModel: MoviesSlidingPaneViewModel by activityViewModels()
     private var isFromWatchlist: Boolean = false
@@ -48,42 +65,15 @@ class MovieDetailsFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentMovieDetailsBinding.inflate(inflater, container, false)
-        binding.viewModel = viewModel
-        binding.lifecycleOwner = viewLifecycleOwner
-        binding.movieDetailsToolbar.title = "Details"
-
-        binding.messageRetryButton.setOnClickListener {
-            viewModel.getMovieDetails(getMovieId())
-        }
-
-        binding.movieDetailsToolbar.inflateMenu(R.menu.details_menu)
-        binding.movieDetailsToolbar.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                R.id.add_to_watchlist -> {
-                    viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-                        viewModel.addToWatchList()
+        val view = ComposeView(requireContext()).apply {
+            setContent {
+                MovieBrowserTheme(windows = activity?.window) {
+                    ProvideWindowInsets {
+                        DetailsScreen()
                     }
-                    context?.showShortToast("Movie added to Watchlist")
-                    true
-                }
-                R.id.remove_from_watchlist -> {
-                    viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-                        viewModel.removeFromWatchlist()
-                    }
-                    context?.showShortToast("Movie removed from Watchlist")
-                    true
-                }
-                else -> {
-                    false
                 }
             }
         }
-
-        Insetter.builder()
-            .padding(windowInsetTypesOf(statusBars = true))
-            .padding(windowInsetTypesOf(navigationBars = true), sides = Side.RIGHT)
-            .applyToView(binding.root)
 
         val movie = try {
             val args: MovieDetailsFragmentArgs by navArgs()
@@ -94,102 +84,283 @@ class MovieDetailsFragment : Fragment() {
         }
         if (movie == null) {
             val movieId = getMovieId()
-            monitorWatchlistStatus(movieId)
-            viewModel.getMovieDetails(movieId)
-        } else {
-            monitorWatchlistStatus(movie.id)
             viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+                viewModel.checkIfInWatchlist(movieId)
+                viewModel.getMovieDetails(movieId)
+            }
+        } else {
+            viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+                viewModel.checkIfInWatchlist(movie.id)
                 viewModel.setMovie(movie)
             }
         }
-        return binding.root
+        return view
     }
 
     private fun getMovieId(): Int {
         return arguments?.get("itemId") as? Int ?: -1
     }
 
-    private fun monitorWatchlistStatus(movieId: Int) {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.isInWatchlist.collect { isInWatchlist ->
-                    viewModel.checkIfInWatchlist(movieId)
-                    //Add to watchlist menu item
-                    binding.movieDetailsToolbar.menu.getItem(0).isVisible = !isInWatchlist
-                    //Remove from watchlist menu item
-                    binding.movieDetailsToolbar.menu.getItem(1).isVisible = isInWatchlist
+    @Composable
+    fun DetailsScreen() {
+        val scrollState = rememberScrollState()
+        val isInWatchlist by viewModel.isInWatchlist.collectAsState()
+        val isTwoPane by movieSlidingPaneViewModel.isTwoPane.collectAsState()
 
-                }
-            }
-        }
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        binding.progressSpinner.visibility = View.VISIBLE
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.movie.collect { movie ->
-                    Glide.with(requireContext())
-                        .load(movie?.posterURL)
-                        .transition(DrawableTransitionOptions.withCrossFade())
-                        .override(Target.SIZE_ORIGINAL)
-                        .addListener(object : RequestListener<Drawable> {
-                            override fun onLoadFailed(
-                                e: GlideException?,
-                                model: Any?,
-                                target: Target<Drawable>?,
-                                isFirstResource: Boolean
-                            ): Boolean {
-                                return false
+        Scaffold(
+            modifier = Modifier.statusBarsPadding(),
+            topBar = {
+                TopAppBar(
+                    title = { Text(text = "Details") },
+                    backgroundColor = Color.White,
+                    elevation = 0.dp,
+                    modifier = Modifier.navigationBarsPadding(bottom = false),
+                    navigationIcon = {
+                        if (!isTwoPane || isFromWatchlist) {
+                            IconButton(onClick = { activity?.onBackPressed() }) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_round_arrow_back_24),
+                                    contentDescription = "Back"
+                                )
                             }
-
-                            override fun onResourceReady(
-                                resource: Drawable?,
-                                model: Any?,
-                                target: Target<Drawable>?,
-                                dataSource: DataSource?,
-                                isFirstResource: Boolean
-                            ): Boolean {
-                                binding.progressSpinner.visibility = View.GONE
-                                return false
-                            }
-
-                        })
-                        .into(binding.moviePoster)
-
-                    binding.movieTitle.text = movie?.getFullTitleText()
-                    binding.movieDescription.text = movie?.description
-                    binding.movieInfo.text = movie?.getInfoText()
-                    if (movie?.tagLine.isNullOrBlank()) {
-                        binding.movieTagline.visibility = View.GONE
-                    } else {
-                        binding.movieTagline.visibility = View.VISIBLE
-                        binding.movieTagline.text = movie?.tagLine
-                    }
-                    binding.rating.text = movie?.getRatingText()
-                }
-            }
-        }
-
-        setNavIcon()
-    }
-
-    private fun setNavIcon() {
-        lifecycleScope.launch {
-            movieSlidingPaneViewModel.isTwoPane
-                .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
-                .collectLatest { isTwoPane ->
-                    if (!isTwoPane || isFromWatchlist) {
-                        binding.movieDetailsToolbar.setNavigationIcon(R.drawable.ic_round_arrow_back_24)
-                        binding.movieDetailsToolbar.setNavigationOnClickListener {
-                            requireActivity().onBackPressed()
                         }
-                    } else {
-                        binding.movieDetailsToolbar.navigationIcon = null
-                        binding.movieDetailsToolbar.setNavigationOnClickListener(null)
+                    },
+                    actions = {
+                        if (isInWatchlist) {
+                            IconButton(onClick = {
+                                context?.showShortToast("Movie removed from Watchlist")
+                                viewLifecycleOwner.lifecycleScope.launchWhenStarted { viewModel.removeFromWatchlist() }
+                            }) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_remove_from_watchlist),
+                                    contentDescription = "Remove from watchlist"
+                                )
+                            }
+                        } else {
+                            IconButton(onClick = {
+                                context?.showShortToast("Movie added to Watchlist")
+                                viewLifecycleOwner.lifecycleScope.launchWhenStarted { viewModel.addToWatchList() }
+                            }) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_add_to_watchlist),
+                                    contentDescription = "Add to watchlist"
+                                )
+                            }
+                        }
+                    }
+                )
+            }
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .background(MaterialTheme.colors.surface)
+                    .verticalScroll(scrollState)
+                    .navigationBarsPadding()
+                    .statusBarsPadding()
+                    .padding(start = 16.dp, end = 16.dp)
+            ) {
+
+                val showLoader by viewModel.showDetailsLoader.collectAsState(true)
+                if (showLoader) {
+                    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.ripple_loading))
+                    val progress by animateLottieCompositionAsState(
+                        composition,
+                        restartOnPlay = true,
+                        iterations = LottieConstants.IterateForever,
+                        speed = 0.5f
+                    )
+                    LottieAnimation(
+                        composition,
+                        progress,
+                        contentScale = ContentScale.FillWidth,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+                val showMessageView by viewModel.showMessageView.collectAsState(true)
+                if (showMessageView) {
+                    val messageAnimation by viewModel.messageAnimation.collectAsState()
+                    val messageText by viewModel.messageText.collectAsState()
+                    val canRetry by viewModel.canRetry.collectAsState()
+
+                    MessageView(
+                        animation = messageAnimation,
+                        messageText = messageText,
+                        canRetry = canRetry
+                    ) {
+                        viewModel.getMovieDetails(getMovieId())
                     }
                 }
+                val movie by viewModel.movie.collectAsState()
+                movie?.let { DetailsContent(movie = it) }
+            }
         }
     }
+
+    @OptIn(ExperimentalCoilApi::class)
+    @Composable
+    fun DetailsContent(movie: Movie) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp, bottom = 16.dp)
+        ) {
+
+            val painter = rememberImagePainter(data = movie.posterURL, builder = {
+                crossfade(true)
+            })
+            if (painter.state is ImagePainter.State.Loading) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .height(50.dp)
+                        .width(50.dp)
+                        .padding(top = 175.dp)
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .wrapContentSize()
+                    .align(Alignment.CenterHorizontally)
+                    .clip(
+                        RoundedCornerShape(8.dp)
+                    )
+            ) {
+                Image(
+                    painter = painter,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .height(350.dp),
+                    contentScale = ContentScale.FillHeight
+                )
+            }
+            Text(
+                text = movie.title,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .padding(16.dp)
+                    .align(Alignment.CenterHorizontally),
+                textAlign = TextAlign.Center
+            )
+            Text(
+                text = movie.getInfoText(),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Normal,
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                textAlign = TextAlign.Center
+            )
+            Text(
+                text = movie.tagLine,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                fontStyle = FontStyle.Italic,
+                modifier = Modifier
+                    .padding(top = 16.dp)
+                    .align(Alignment.CenterHorizontally),
+                textAlign = TextAlign.Center
+            )
+            Text(
+                text = stringResource(id = R.string.rating),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
+                textAlign = TextAlign.Start
+            )
+            Text(
+                text = movie.getRatingText(),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Normal,
+                textAlign = TextAlign.Start
+            )
+            Text(
+                text = stringResource(id = R.string.overview),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
+                textAlign = TextAlign.Start
+            )
+            Text(
+                text = movie.description,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Normal,
+                textAlign = TextAlign.Start
+            )
+        }
+    }
+
+    @Composable
+    fun MessageView(
+        @RawRes animation: Int,
+        messageText: String,
+        canRetry: Boolean,
+        onRetry: () -> Unit
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .padding(start = 16.dp, end = 16.dp)
+        ) {
+
+            val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(animation))
+            val progress by animateLottieCompositionAsState(
+                composition,
+                restartOnPlay = true,
+                iterations = 1,
+                speed = 0.5f
+            )
+            LottieAnimation(
+                composition,
+                progress,
+                contentScale = ContentScale.FillWidth,
+                modifier = Modifier.fillMaxWidth(0.5f)
+            )
+
+            Text(
+                text = messageText,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(16.dp)
+            )
+            if (canRetry) {
+                Button(onClick = { onRetry() }) {
+                    Text(text = stringResource(id = R.string.retry))
+                }
+            }
+        }
+    }
+
+    @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
+    @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+    @Composable
+    fun DetailsContentPreview() {
+        val movie = Movie(
+            id = 2,
+            title = "Free Guy",
+            description = "A bank teller called Guy realizes...",
+            posterURL = "https://image.tmdb.org/t/p/w500/freeguy.img",
+            releaseDate = "2021-08-11",
+            rating = 7.8,
+            genre = listOf("Comedy", "Adventure"),
+            runTime = "1h 55m",
+            status = "Released",
+            tagLine = "Life's too short to be a background character.",
+            votes = 4038
+        )
+
+        MovieBrowserTheme(windows = null) {
+            ProvideWindowInsets {
+                DetailsContent(movie)
+            }
+        }
+    }
+
+    @Preview(showBackground = true)
+    @Composable
+    fun MessageViewPreview() {
+        MovieBrowserTheme(windows = null) {
+            MessageView(R.raw.loader_movie, "Some message text here", canRetry = true, onRetry = {})
+        }
+    }
+
 }
+
