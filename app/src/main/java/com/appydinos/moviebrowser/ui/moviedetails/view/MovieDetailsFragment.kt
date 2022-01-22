@@ -136,7 +136,7 @@ class MovieDetailsFragment : Fragment() {
                                     contentDescription = "Remove from watchlist"
                                 )
                             }
-                        } else {
+                        } else if (getMovieId() > 0) {
                             IconButton(onClick = {
                                 context?.showShortToast("Movie added to Watchlist")
                                 viewLifecycleOwner.lifecycleScope.launchWhenStarted { viewModel.addToWatchList() }
@@ -299,7 +299,8 @@ class MovieDetailsFragment : Fragment() {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
-                .padding(start = 16.dp, end = 16.dp)
+                .padding(start = 16.dp, end = 16.dp).fillMaxSize(),
+            verticalArrangement = Arrangement.Center
         ) {
 
             val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(animation))
@@ -312,8 +313,8 @@ class MovieDetailsFragment : Fragment() {
             LottieAnimation(
                 composition,
                 progress,
-                contentScale = ContentScale.FillWidth,
-                modifier = Modifier.fillMaxWidth(0.5f)
+                contentScale = ContentScale.FillBounds,
+                modifier = Modifier.fillMaxWidth(0.5f).aspectRatio(1F, true).wrapContentHeight()
             )
 
             Text(
