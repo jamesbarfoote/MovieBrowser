@@ -1,12 +1,13 @@
 package com.appydinos.moviebrowser.ui.watchlist.adapter
 
+import android.view.View
 import android.view.ViewGroup
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import com.appydinos.moviebrowser.data.model.Movie
 
 class WatchlistAdapter(
-    private var onSelect: (Movie) -> Unit,
+    private var onSelect: (Movie, View, Int) -> Unit,
     private var onLongClick: (Movie) -> Unit
 ) : PagingDataAdapter<Movie, WatchlistRecyclerViewAdapter>(MOVIE_COMPARATOR) {
 

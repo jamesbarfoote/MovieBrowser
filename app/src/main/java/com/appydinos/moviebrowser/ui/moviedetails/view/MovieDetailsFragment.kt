@@ -24,6 +24,8 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
+import com.google.android.material.transition.MaterialContainerTransform
+import com.google.android.material.transition.MaterialSharedAxis
 import dagger.hilt.android.AndroidEntryPoint
 import dev.chrisbanes.insetter.Insetter
 import dev.chrisbanes.insetter.Side
@@ -49,6 +51,7 @@ class MovieDetailsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentMovieDetailsBinding.inflate(inflater, container, false)
+
         binding.viewModel = viewModel
         binding.lifecycleOwner = viewLifecycleOwner
         binding.movieDetailsToolbar.title = "Details"
@@ -88,6 +91,13 @@ class MovieDetailsFragment : Fragment() {
         val movie = try {
             val args: MovieDetailsFragmentArgs by navArgs()
             isFromWatchlist = args.origin == "Watchlist"
+            if (isFromWatchlist) {
+                enterTransition = MaterialSharedAxis(MaterialSharedAxis.Z, /* forward= */ true)
+                returnTransition = MaterialSharedAxis(MaterialSharedAxis.Z, /* forward= */ false)
+                sharedElementEnterTransition = MaterialContainerTransform().apply {
+                    this.endViewId = R.id.moviePoster
+                }
+            }
             args.movie
         } catch (ex: java.lang.Exception) {
             null

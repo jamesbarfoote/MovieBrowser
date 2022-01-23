@@ -15,15 +15,16 @@ import com.bumptech.glide.request.target.Target
  */
 class WatchlistRecyclerViewAdapter(
     binding: WatchlistItemBinding,
-    private var onSelect: (Movie) -> Unit,
+    private var onSelect: (Movie, view: View, position: Int) -> Unit,
     private var onLongClick: (Movie) -> Unit
 ) : RecyclerView.ViewHolder(binding.root) {
     private val image = binding.moviePoster
     private val rating = binding.rating
     private val card = binding.movieCard
+    private val root = binding.root
 
     companion object {
-        fun create(parent: ViewGroup, onSelect: (Movie) -> Unit, onLongClick: (Movie) -> Unit): WatchlistRecyclerViewAdapter {
+        fun create(parent: ViewGroup, onSelect: (movie: Movie, View, Int) -> Unit, onLongClick: (Movie) -> Unit): WatchlistRecyclerViewAdapter {
             val view = WatchlistItemBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent,
@@ -40,8 +41,9 @@ class WatchlistRecyclerViewAdapter(
             .override(Target.SIZE_ORIGINAL)
             .into(image)
 
+        image.transitionName = movie.posterURL
         card.setOnClickListener {
-            onSelect(movie)
+            onSelect(movie, it, bindingAdapterPosition)
         }
         card.setOnLongClickListener {
             onLongClick(movie)

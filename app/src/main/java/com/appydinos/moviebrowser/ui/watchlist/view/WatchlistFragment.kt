@@ -4,17 +4,22 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import androidx.paging.map
+import com.appydinos.moviebrowser.R
 import com.appydinos.moviebrowser.databinding.FragmentWatchlistBinding
 import com.appydinos.moviebrowser.ui.movielist.adapter.MoviesLoadStateAdapter
 import com.appydinos.moviebrowser.ui.watchlist.adapter.WatchlistAdapter
 import com.appydinos.moviebrowser.ui.watchlist.viewmodel.WatchlistViewModel
 import com.google.android.flexbox.*
+import com.google.android.material.transition.MaterialContainerTransform
+import com.google.android.material.transition.MaterialSharedAxis
 import dagger.hilt.android.AndroidEntryPoint
 import dev.chrisbanes.insetter.Insetter
 import dev.chrisbanes.insetter.Side
@@ -34,6 +39,7 @@ class WatchlistFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+
         val binding = FragmentWatchlistBinding.inflate(inflater, container, false)
 
         val layoutManager = FlexboxLayoutManager(context)
@@ -43,13 +49,26 @@ class WatchlistFragment : Fragment() {
         layoutManager.flexWrap = FlexWrap.WRAP
         binding.list.layoutManager = layoutManager
 
-        watchlistAdapter = WatchlistAdapter(onSelect = { selectedMovie ->
-            findNavController().navigate(
-                WatchlistFragmentDirections.actionWatchlistFragmentToMovieDetailsFragment(
-                    movie = selectedMovie,
-                    origin = "Watchlist"
-                )
+        exitTransition = MaterialSharedAxis(MaterialSharedAxis.Z, /* forward= */ true).apply {
+            this.duration = 300
+        }
+        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Z, /* forward= */ false)
+
+        watchlistAdapter = WatchlistAdapter(onSelect = { selectedMovie, view, position ->
+            sharedElementEnterTransition = MaterialContainerTransform().apply {
+                startViewId = view.id
+            }
+            val extras = FragmentNavigatorExtras(view to selectedMovie.posterURL)
+            val action = WatchlistFragmentDirections.actionWatchlistFragmentToMovieDetailsFragment(
+                movie = selectedMovie,
+                origin = "Watchlist"
             )
+
+            ViewCompat.setTransitionName(view, selectedMovie.posterURL)
+            ViewCompat.setTransitionName(view.findViewById(R.id.moviePoster), selectedMovie.posterURL)
+
+            findNavController().navigate(action, extras)
+
         }) { selectedMovie ->
             watchlistBottomSheet = WatchlistBottomSheet.newInstance(selectedMovie.title) {
                 viewLifecycleOwner.lifecycleScope.launchWhenStarted {
