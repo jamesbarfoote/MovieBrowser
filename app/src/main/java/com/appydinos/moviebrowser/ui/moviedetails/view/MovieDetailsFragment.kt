@@ -43,6 +43,7 @@ import com.appydinos.moviebrowser.R
 import com.appydinos.moviebrowser.data.model.Movie
 import com.appydinos.moviebrowser.extensions.showShortToast
 import com.appydinos.moviebrowser.ui.compose.MovieBrowserTheme
+import com.appydinos.moviebrowser.ui.compose.components.RotatingIcon
 import com.appydinos.moviebrowser.ui.moviedetails.viewmodel.MovieDetailsViewModel
 import com.appydinos.moviebrowser.ui.movielist.viewmodel.MoviesSlidingPaneViewModel
 import com.google.accompanist.insets.ProvideWindowInsets
@@ -108,13 +109,15 @@ class MovieDetailsFragment : Fragment() {
         val isTwoPane by movieSlidingPaneViewModel.isTwoPane.collectAsState()
 
         Scaffold(
-            modifier = Modifier.statusBarsPadding(),
+            modifier = Modifier,
             topBar = {
                 TopAppBar(
                     title = { Text(text = "Details") },
                     backgroundColor = Color.White,
                     elevation = 0.dp,
-                    modifier = Modifier.navigationBarsPadding(bottom = false),
+                    modifier = Modifier
+                        .statusBarsPadding()
+                        .navigationBarsPadding(bottom = false),
                     navigationIcon = {
                         if (!isTwoPane || isFromWatchlist) {
                             IconButton(onClick = { activity?.onBackPressed() }) {
@@ -126,27 +129,19 @@ class MovieDetailsFragment : Fragment() {
                         }
                     },
                     actions = {
-                        if (isInWatchlist) {
-                            IconButton(onClick = {
-                                context?.showShortToast("Movie removed from Watchlist")
-                                viewLifecycleOwner.lifecycleScope.launchWhenStarted { viewModel.removeFromWatchlist() }
-                            }) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_remove_from_watchlist),
-                                    contentDescription = "Remove from watchlist"
-                                )
-                            }
-                        } else if (getMovieId() > 0) {
-                            IconButton(onClick = {
-                                context?.showShortToast("Movie added to Watchlist")
-                                viewLifecycleOwner.lifecycleScope.launchWhenStarted { viewModel.addToWatchList() }
-                            }) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_add_to_watchlist),
-                                    contentDescription = "Add to watchlist"
-                                )
-                            }
-                        }
+                            RotatingIcon(
+                                iconId = if (isInWatchlist) R.drawable.ic_remove_from_watchlist else R.drawable.ic_add_to_watchlist,
+                                description = if (isInWatchlist) "Remove from watchlist" else "Add to watchlist",
+                                onClicked = {
+                                    if (isInWatchlist) {
+                                        context?.showShortToast("Movie removed from Watchlist")
+                                        viewLifecycleOwner.lifecycleScope.launchWhenStarted { viewModel.removeFromWatchlist() }
+                                    } else {
+                                        context?.showShortToast("Movie added to Watchlist")
+                                        viewLifecycleOwner.lifecycleScope.launchWhenStarted { viewModel.addToWatchList() }
+                                    }
+                                }
+                            )
                     }
                 )
             }
@@ -299,7 +294,8 @@ class MovieDetailsFragment : Fragment() {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
-                .padding(start = 16.dp, end = 16.dp).fillMaxSize(),
+                .padding(start = 16.dp, end = 16.dp)
+                .fillMaxSize(),
             verticalArrangement = Arrangement.Center
         ) {
 
@@ -314,7 +310,10 @@ class MovieDetailsFragment : Fragment() {
                 composition,
                 progress,
                 contentScale = ContentScale.FillBounds,
-                modifier = Modifier.fillMaxWidth(0.5f).aspectRatio(1F, true).wrapContentHeight()
+                modifier = Modifier
+                    .fillMaxWidth(0.5f)
+                    .aspectRatio(1F, true)
+                    .wrapContentHeight()
             )
 
             Text(
