@@ -1,4 +1,4 @@
-package com.appydinos.moviebrowser.ui.movielist.adapter
+package com.appydinos.moviebrowser.ui.watchlist.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup

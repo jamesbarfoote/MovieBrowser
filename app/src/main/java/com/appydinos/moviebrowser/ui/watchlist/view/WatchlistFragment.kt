@@ -11,7 +11,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import androidx.paging.map
 import com.appydinos.moviebrowser.databinding.FragmentWatchlistBinding
-import com.appydinos.moviebrowser.ui.movielist.adapter.MoviesLoadStateAdapter
+import com.appydinos.moviebrowser.ui.watchlist.adapter.MoviesLoadStateAdapter
 import com.appydinos.moviebrowser.ui.watchlist.adapter.WatchlistAdapter
 import com.appydinos.moviebrowser.ui.watchlist.viewmodel.WatchlistViewModel
 import com.google.android.flexbox.*

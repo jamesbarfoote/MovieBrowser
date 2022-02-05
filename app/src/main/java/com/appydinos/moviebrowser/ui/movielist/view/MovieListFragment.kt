@@ -1,27 +1,57 @@
 package com.appydinos.moviebrowser.ui.movielist.view
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Devices
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.os.bundleOf
 import androidx.core.view.doOnNextLayout
 import androidx.fragment.app.*
-import androidx.lifecycle.lifecycleScope
+import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemsIndexed
 import androidx.slidingpanelayout.widget.SlidingPaneLayout
+import coil.annotation.ExperimentalCoilApi
+import coil.compose.ImagePainter
+import coil.compose.rememberImagePainter
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.appydinos.moviebrowser.R
+import com.appydinos.moviebrowser.data.model.Movie
 import com.appydinos.moviebrowser.databinding.FragmentMovieListBinding
+import com.appydinos.moviebrowser.ui.compose.MovieBrowserTheme
+import com.appydinos.moviebrowser.ui.compose.components.MessageView
+import com.appydinos.moviebrowser.ui.compose.components.RatingIcon
+import com.appydinos.moviebrowser.ui.compose.components.RoundedCornerImage
 import com.appydinos.moviebrowser.ui.moviedetails.view.MovieDetailsFragment
-import com.appydinos.moviebrowser.ui.movielist.adapter.MoviesAdapter
-import com.appydinos.moviebrowser.ui.movielist.adapter.MoviesLoadStateAdapter
 import com.appydinos.moviebrowser.ui.movielist.viewmodel.MovieListViewModel
 import com.appydinos.moviebrowser.ui.movielist.viewmodel.MoviesSlidingPaneViewModel
+import com.google.accompanist.insets.ProvideWindowInsets
+import com.google.accompanist.insets.statusBarsPadding
 import dagger.hilt.android.AndroidEntryPoint
-import dev.chrisbanes.insetter.Insetter
-import dev.chrisbanes.insetter.windowInsetTypesOf
-import kotlinx.coroutines.flow.collectLatest
+import timber.log.Timber
 
 /**
  * A fragment representing a list of Movies.
@@ -30,7 +60,6 @@ import kotlinx.coroutines.flow.collectLatest
 class MovieListFragment : Fragment() {
     private val viewModel: MovieListViewModel by viewModels()
     private val movieSlidingPaneViewModel: MoviesSlidingPaneViewModel by activityViewModels()
-    private lateinit var moviesAdapter: MoviesAdapter
     private lateinit var binding: FragmentMovieListBinding
 
     override fun onCreateView(
@@ -38,34 +67,18 @@ class MovieListFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentMovieListBinding.inflate(inflater)
-        requireActivity().onBackPressedDispatcher.addCallback(
-            viewLifecycleOwner,
-            TwoPaneOnBackPressedCallback(binding.slidingPaneLayout)
-        )
-        moviesAdapter = MoviesAdapter { selectedMovie ->
-            openDetails(selectedMovie.id, binding)
-        }
-
-        binding.list.adapter =
-            moviesAdapter.withLoadStateFooter(footer = MoviesLoadStateAdapter(moviesAdapter::retry))
-
-        moviesAdapter.addLoadStateListener { loadStates ->
-            if ((loadStates.source.refresh is LoadState.NotLoading || loadStates.refresh is LoadState.Loading) && moviesAdapter.itemCount == 0) {
-                // Initial load so show the loader
-                binding.lottieLoader.visibility = View.VISIBLE
-            } else {
-                // Hide the loader as we are either not loading or we have items in the list
-                binding.lottieLoader.visibility = View.GONE
+        val listView = binding.listContent as ComposeView
+        listView.setContent {
+            MovieBrowserTheme(windows = null) {
+                ProvideWindowInsets {
+                    Content()
+                }
             }
-            if (loadStates.refresh is LoadState.Error) {
-                binding.errorView.visibility = View.VISIBLE
-                binding.errorText.text = (loadStates.refresh as LoadState.Error).error.message
-                binding.errorRetryButton.setOnClickListener { moviesAdapter.retry() }
-            } else {
-                binding.errorView.visibility = View.GONE
-            }
+            requireActivity().onBackPressedDispatcher.addCallback(
+                viewLifecycleOwner,
+                TwoPaneOnBackPressedCallback(binding.slidingPaneLayout)
+            )
         }
-        setWindowInsets(binding.list)
         return binding.root
     }
 
@@ -89,18 +102,177 @@ class MovieListFragment : Fragment() {
         binding.slidingPaneLayout.doOnNextLayout {
             movieSlidingPaneViewModel.setIsTwoPane(!binding.slidingPaneLayout.isSlideable)
         }
-        lifecycleScope.launchWhenCreated {
-            viewModel.moviesList.collectLatest {
-                moviesAdapter.submitData(it)
+    }
+
+    @Composable
+    fun Content() {
+        val lazyPagingItems = viewModel.pagingData.collectAsLazyPagingItems()
+
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier
+                .statusBarsPadding()
+        ) {
+            itemsIndexed(lazyPagingItems) { _, item ->
+                if (item != null) {
+                    MovieListItem(movie = item) {
+                        openDetails(item.id, binding)
+                    }
+                }
+            }
+
+            item {
+                LoadStateView(
+                    loadState = lazyPagingItems.loadState, movieCount = lazyPagingItems.itemCount
+                ) { lazyPagingItems.retry() }
             }
         }
     }
 
-    private fun setWindowInsets(v: View) {
-        Insetter.builder()
-            .paddingBottom(windowInsetTypesOf(navigationBars = true))
-            .padding(windowInsetTypesOf(statusBars = true))
-            .applyToView(v)
+    @OptIn(ExperimentalCoilApi::class, ExperimentalMaterialApi::class)
+    @Composable
+    fun MovieListItem(movie: Movie, onClick: (Movie) -> Unit) {
+        Card(onClick = { onClick(movie) }) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                val painter = rememberImagePainter(data = movie.posterURL, builder = {
+                    crossfade(true)
+                })
+                if (painter.state is ImagePainter.State.Loading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .height(50.dp)
+                            .width(50.dp)
+                            .padding(top = 175.dp)
+                    )
+                }
+                ConstraintLayout(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                    val (image, rating) = createRefs()
+
+                    RoundedCornerImage(
+                        painter = painter,
+                        height = 300.dp,
+                        modifier = Modifier.constrainAs(image) {
+                            top.linkTo(parent.top)
+                            start.linkTo(parent.start)
+                            end.linkTo(parent.end)
+                        }
+                    )
+                    RatingIcon(rating = movie.rating, modifier = Modifier.constrainAs(rating) {
+                        start.linkTo(image.start, margin = 4.dp)
+                        bottom.linkTo(image.bottom, margin = 8.dp)
+                    })
+                }
+                Text(movie.title, fontSize = 16.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp))
+                Text(movie.description, fontSize = 14.sp, textAlign = TextAlign.Start, modifier = Modifier.fillMaxWidth())
+            }
+        }
+    }
+
+    @Composable
+    fun LoadStateView(loadState: CombinedLoadStates, movieCount: Int, onRetry: () -> Unit) {
+        if ((loadState.source.refresh is LoadState.NotLoading || loadState.refresh is LoadState.Loading) && movieCount == 0) {
+                // Initial load so show the loader
+            val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.ripple_loading))
+            val progress by animateLottieCompositionAsState(
+                composition,
+                restartOnPlay = true,
+                iterations = 1,
+                speed = 0.5f
+            )
+            LottieAnimation(
+                composition,
+                progress,
+                contentScale = ContentScale.FillBounds,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentWidth(Alignment.CenterHorizontally)
+                    .aspectRatio(1F, true)
+                    .wrapContentHeight(Alignment.CenterVertically)
+            )
+        }
+        if (loadState.append == LoadState.Loading) {
+            FooterView(isLoading = true, "") {}
+        }
+
+        if (loadState.refresh is LoadState.Error && !loadState.append.endOfPaginationReached && movieCount == 0) {
+            //Initial load failed
+            val error = (loadState.refresh as? LoadState.Error)?.error?.message
+            MessageView(modifier = Modifier, animation = R.raw.details_error, messageText = error.orEmpty(), canRetry = true) {
+                onRetry()
+            }
+        } else if (loadState.refresh is LoadState.Error || loadState.append is LoadState.Error) {
+            val message = ((loadState.refresh as? LoadState.Error) ?: (loadState.append as? LoadState.Error))?.error?.message
+            Timber.v("Error: $message")
+            FooterView(isLoading = false, errorMessage = message.orEmpty()) {
+                onRetry()
+            }
+        }
+    }
+    
+    @Composable
+    fun FooterView(isLoading: Boolean, errorMessage: String, onRetry: () -> Unit) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Top) {
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .fillMaxWidth()
+                        .wrapContentWidth(Alignment.CenterHorizontally)
+                )
+            } else {
+                Row(
+                    Modifier
+                        .wrapContentHeight()
+                        .fillMaxWidth()
+                        .padding(8.dp), horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
+                ) {
+                    Text(
+                        text = errorMessage, color = Color.Red, modifier = Modifier
+                            .fillMaxWidth(0.7f)
+                            .padding(end = 8.dp)
+                    )
+                    Button(onClick = onRetry, modifier = Modifier.wrapContentSize()) {
+                        Text(text = "Retry")
+                    }
+                }
+            }
+        }
+    }
+
+    @Preview(showBackground = true)
+    @Composable
+    fun FooterPreview() {
+        FooterView(isLoading = false, errorMessage = "This is a long error message so that we can see what it looks like when it wraps") {}
+    }
+
+    @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
+    @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+    @Preview(showBackground = true, device = Devices.AUTOMOTIVE_1024p, widthDp = 1024, heightDp = 720)
+    @Composable
+    fun MovieContentPreview() {
+        val movie = Movie(
+            id = 2,
+            title = "Free Guy",
+            description = "A bank teller called Guy realizes...",
+            posterURL = "https://image.tmdb.org/t/p/w500/freeguy.img",
+            releaseDate = "2021-08-11",
+            rating = 7.8,
+            genre = listOf("Comedy", "Adventure"),
+            runTime = "1h 55m",
+            status = "Released",
+            tagLine = "Life's too short to be a background character.",
+            votes = 4038
+        )
+
+        MovieBrowserTheme(windows = null) {
+            ProvideWindowInsets {
+                MovieListItem(movie) {}
+            }
+        }
     }
 }
 

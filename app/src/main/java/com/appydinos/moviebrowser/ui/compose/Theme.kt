@@ -14,11 +14,11 @@ private val DarkColorPalette = darkColors(
     primary = CoralCoastTeal,
     primaryVariant = KingfisherBrightBlue,
     secondary = SpreadsheetGreen,
-    background = Color.White,
+    background = Color.Black,
     surface = Color.Black,
     onPrimary = Color.White,
     onSecondary = Color.Black,
-    onBackground = Color.Black,
+    onBackground = Color.White,
     onSurface = Color.White
 )
 
