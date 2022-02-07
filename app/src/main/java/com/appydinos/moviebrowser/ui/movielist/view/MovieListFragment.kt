@@ -8,14 +8,13 @@ import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.*
+import androidx.compose.material.Card
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
@@ -26,23 +25,18 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.os.bundleOf
 import androidx.core.view.doOnNextLayout
 import androidx.fragment.app.*
-import androidx.paging.CombinedLoadStates
-import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemsIndexed
 import androidx.slidingpanelayout.widget.SlidingPaneLayout
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.ImagePainter
 import coil.compose.rememberImagePainter
-import com.airbnb.lottie.compose.LottieAnimation
-import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.airbnb.lottie.compose.animateLottieCompositionAsState
-import com.airbnb.lottie.compose.rememberLottieComposition
 import com.appydinos.moviebrowser.R
 import com.appydinos.moviebrowser.data.model.Movie
 import com.appydinos.moviebrowser.databinding.FragmentMovieListBinding
 import com.appydinos.moviebrowser.ui.compose.MovieBrowserTheme
-import com.appydinos.moviebrowser.ui.compose.components.MessageView
+import com.appydinos.moviebrowser.ui.compose.components.FooterView
+import com.appydinos.moviebrowser.ui.compose.components.LoadStateView
 import com.appydinos.moviebrowser.ui.compose.components.RatingIcon
 import com.appydinos.moviebrowser.ui.compose.components.RoundedCornerImage
 import com.appydinos.moviebrowser.ui.moviedetails.view.MovieDetailsFragment
@@ -51,7 +45,6 @@ import com.appydinos.moviebrowser.ui.movielist.viewmodel.MoviesSlidingPaneViewMo
 import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.insets.statusBarsPadding
 import dagger.hilt.android.AndroidEntryPoint
-import timber.log.Timber
 
 /**
  * A fragment representing a list of Movies.
@@ -67,7 +60,7 @@ class MovieListFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentMovieListBinding.inflate(inflater)
-        val listView = binding.listContent as ComposeView
+        val listView = binding.listContent
         listView.setContent {
             MovieBrowserTheme(windows = null) {
                 ProvideWindowInsets {
@@ -167,78 +160,6 @@ class MovieListFragment : Fragment() {
                     .fillMaxWidth()
                     .padding(8.dp))
                 Text(movie.description, fontSize = 14.sp, textAlign = TextAlign.Start, modifier = Modifier.fillMaxWidth())
-            }
-        }
-    }
-
-    @Composable
-    fun LoadStateView(loadState: CombinedLoadStates, movieCount: Int, onRetry: () -> Unit) {
-        if ((loadState.source.refresh is LoadState.NotLoading || loadState.refresh is LoadState.Loading) && movieCount == 0) {
-                // Initial load so show the loader
-            val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.ripple_loading))
-            val progress by animateLottieCompositionAsState(
-                composition,
-                restartOnPlay = true,
-                iterations = 1,
-                speed = 0.5f
-            )
-            LottieAnimation(
-                composition,
-                progress,
-                contentScale = ContentScale.FillBounds,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentWidth(Alignment.CenterHorizontally)
-                    .aspectRatio(1F, true)
-                    .wrapContentHeight(Alignment.CenterVertically)
-            )
-        }
-        if (loadState.append == LoadState.Loading) {
-            FooterView(isLoading = true, "") {}
-        }
-
-        if (loadState.refresh is LoadState.Error && !loadState.append.endOfPaginationReached && movieCount == 0) {
-            //Initial load failed
-            val error = (loadState.refresh as? LoadState.Error)?.error?.message
-            MessageView(modifier = Modifier, animation = R.raw.details_error, messageText = error.orEmpty(), canRetry = true) {
-                onRetry()
-            }
-        } else if (loadState.refresh is LoadState.Error || loadState.append is LoadState.Error) {
-            val message = ((loadState.refresh as? LoadState.Error) ?: (loadState.append as? LoadState.Error))?.error?.message
-            Timber.v("Error: $message")
-            FooterView(isLoading = false, errorMessage = message.orEmpty()) {
-                onRetry()
-            }
-        }
-    }
-    
-    @Composable
-    fun FooterView(isLoading: Boolean, errorMessage: String, onRetry: () -> Unit) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Top) {
-            if (isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .fillMaxWidth()
-                        .wrapContentWidth(Alignment.CenterHorizontally)
-                )
-            } else {
-                Row(
-                    Modifier
-                        .wrapContentHeight()
-                        .fillMaxWidth()
-                        .padding(8.dp), horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Top
-                ) {
-                    Text(
-                        text = errorMessage, color = Color.Red, modifier = Modifier
-                            .fillMaxWidth(0.7f)
-                            .padding(end = 8.dp)
-                    )
-                    Button(onClick = onRetry, modifier = Modifier.wrapContentSize()) {
-                        Text(text = "Retry")
-                    }
-                }
             }
         }
     }

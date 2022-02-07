@@ -106,11 +106,12 @@ class MovieDetailsFragment : Fragment() {
         val scrollState = rememberScrollState()
         val isInWatchlist by viewModel.isInWatchlist.collectAsState()
         val isTwoPane by movieSlidingPaneViewModel.isTwoPane.collectAsState()
+        val movie by viewModel.movie.collectAsState()
 
         Scaffold(
             modifier = Modifier,
             topBar = {
-                DetailsToolbar(isInWatchlist = isInWatchlist, isTwoPane = isTwoPane)
+                DetailsToolbar(isInWatchlist = isInWatchlist, isTwoPane = isTwoPane, movie = movie)
             }
         ) {
             val showLoader by viewModel.showDetailsLoader.collectAsState(true)
@@ -141,11 +142,13 @@ class MovieDetailsFragment : Fragment() {
                 val showMessageView by viewModel.showMessageView.collectAsState(true)
                 if (showMessageView) {
                     val messageAnimation by viewModel.messageAnimation.collectAsState()
+                    val animationAspectRatio by viewModel.messageAnimationAspectRatio.collectAsState()
                     val messageText by viewModel.messageText.collectAsState()
                     val canRetry by viewModel.canRetry.collectAsState()
 
                     MessageView(
                         animation = messageAnimation,
+                        animationAspectRation = animationAspectRatio,
                         messageText = messageText,
                         canRetry = canRetry
                     ) {
@@ -159,7 +162,7 @@ class MovieDetailsFragment : Fragment() {
     }
 
     @Composable
-    fun DetailsToolbar(isInWatchlist: Boolean, isTwoPane: Boolean) {
+    fun DetailsToolbar(isInWatchlist: Boolean, isTwoPane: Boolean, movie: Movie?) {
         TopAppBar(
             title = { Text(text = "Details") },
             backgroundColor = MaterialTheme.colors.background,
@@ -178,19 +181,21 @@ class MovieDetailsFragment : Fragment() {
                 }
             },
             actions = {
-                RotatingIcon(
-                    iconId = if (isInWatchlist) R.drawable.ic_remove_from_watchlist else R.drawable.ic_add_to_watchlist,
-                    description = if (isInWatchlist) "Remove from watchlist" else "Add to watchlist",
-                    onClicked = {
-                        if (isInWatchlist) {
-                            context?.showShortToast("Movie removed from Watchlist")
-                            viewLifecycleOwner.lifecycleScope.launchWhenStarted { viewModel.removeFromWatchlist() }
-                        } else {
-                            context?.showShortToast("Movie added to Watchlist")
-                            viewLifecycleOwner.lifecycleScope.launchWhenStarted { viewModel.addToWatchList() }
+                if (movie != null) {
+                    RotatingIcon(
+                        iconId = if (isInWatchlist) R.drawable.ic_remove_from_watchlist else R.drawable.ic_add_to_watchlist,
+                        description = if (isInWatchlist) "Remove from watchlist" else "Add to watchlist",
+                        onClicked = {
+                            if (isInWatchlist) {
+                                context?.showShortToast("Movie removed from Watchlist")
+                                viewLifecycleOwner.lifecycleScope.launchWhenStarted { viewModel.removeFromWatchlist() }
+                            } else {
+                                context?.showShortToast("Movie added to Watchlist")
+                                viewLifecycleOwner.lifecycleScope.launchWhenStarted { viewModel.addToWatchList() }
+                            }
                         }
-                    }
-                )
+                    )
+                }
             }
         )
     }
@@ -309,8 +314,22 @@ class MovieDetailsFragment : Fragment() {
     @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, group = "Toolbar")
     @Composable
     fun ToolbarPreview() {
+        val movie = Movie(
+            id = 2,
+            title = "Free Guy",
+            description = "A bank teller called Guy realizes...",
+            posterURL = "https://image.tmdb.org/t/p/w500/freeguy.img",
+            releaseDate = "2021-08-11",
+            rating = 7.8,
+            genre = listOf("Comedy", "Adventure"),
+            runTime = "1h 55m",
+            status = "Released",
+            tagLine = "Life's too short to be a background character.",
+            votes = 4038
+        )
+
         MovieBrowserTheme(windows = null) {
-            DetailsToolbar(isInWatchlist = true, isTwoPane = false)
+            DetailsToolbar(isInWatchlist = true, isTwoPane = false, movie)
         }
     }
 }

@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -26,7 +27,8 @@ fun RoundedCornerImage(painter: Painter, height: Dp, modifier: Modifier = Modifi
             painter = painter,
             contentDescription = null,
             modifier = Modifier
-                .height(height),
+                .height(height)
+                .wrapContentWidth(),
             contentScale = ContentScale.FillHeight
         )
     }

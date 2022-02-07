@@ -29,14 +29,21 @@ class MovieDetailsViewModel @Inject constructor(
     private val _showDetailsLoader = MutableStateFlow(true)
     val showDetailsLoader: StateFlow<Boolean> = _showDetailsLoader
 
+
     private val _showMessageView = MutableStateFlow(false)
     val showMessageView: StateFlow<Boolean> = _showMessageView
+
     private val _messageText = MutableStateFlow("")
     val messageText: StateFlow<String> = _messageText
+
     private val _messageAnimation = MutableStateFlow(R.raw.details_error)
     val messageAnimation: StateFlow<Int> = _messageAnimation
+
     private val _canRetry = MutableStateFlow(false)
     val canRetry: StateFlow<Boolean> = _canRetry
+
+    private val _messageAnimationAspectRatio = MutableStateFlow(1f)
+    val messageAnimationAspectRatio: StateFlow<Float> = _messageAnimationAspectRatio
 
     private val _isInWatchlist = MutableStateFlow(false)
     val isInWatchlist: StateFlow<Boolean> = _isInWatchlist
@@ -45,11 +52,11 @@ class MovieDetailsViewModel @Inject constructor(
         try {
             if (movieId < 0) {
                 //Invalid movie ID so show error message
-                showErrorView(errorMessage = "Select a movie to see its details", animation = R.raw.loader_movie, canRetry = false)
+                showErrorView(errorMessage = "Select a movie to see its details", animation = R.raw.loader_movie, canRetry = false, 1f)
             } else {
                 val result = repository.getMovieDetails(movieId)
                 if (result == null) {
-                    showErrorView("Failed to get movie details")
+                    showErrorView("Failed to get movie details", aspectRatio = 0.8f)
                 } else {
                     _showMessageView.value = false
                 }
@@ -57,16 +64,17 @@ class MovieDetailsViewModel @Inject constructor(
                 _movie.value = result
             }
         } catch (ex: Exception) {
-            showErrorView("Something went wrong when trying to get the movie details")
+            showErrorView("Something went wrong when trying to get the movie details", aspectRatio = 0.8f)
             Timber.e(ex.message.orEmpty())
         }
     }
 
-    private fun showErrorView(errorMessage: String, @RawRes animation: Int = R.raw.details_error, canRetry: Boolean = true) {
+    private fun showErrorView(errorMessage: String, @RawRes animation: Int = R.raw.details_error, canRetry: Boolean = true, aspectRatio: Float) {
         _showDetailsLoader.value = false
         _showMessageView.value = true
         _messageText.value = errorMessage
         _messageAnimation.value = animation
+        _messageAnimationAspectRatio.value = aspectRatio
         _canRetry.value = canRetry
     }
 

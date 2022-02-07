@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Button
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,6 +31,7 @@ import com.appydinos.moviebrowser.ui.compose.MovieBrowserTheme
 fun MessageView(
     modifier: Modifier = Modifier,
     @RawRes animation: Int,
+    animationAspectRation: Float = 1f,
     messageText: String,
     canRetry: Boolean,
     onRetry: () -> Unit
@@ -56,13 +58,14 @@ fun MessageView(
             modifier = Modifier
                 .fillMaxWidth(0.5f)
                 .wrapContentHeight()
-                .aspectRatio(0.8f, false)
+                .aspectRatio(animationAspectRation, false)
         )
 
         Text(
             text = messageText,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp),
+            color = MaterialTheme.colors.onBackground
         )
         if (canRetry) {
             Button(onClick = { onRetry() }) {
