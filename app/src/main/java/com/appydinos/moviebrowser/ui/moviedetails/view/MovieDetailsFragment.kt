@@ -164,12 +164,12 @@ class MovieDetailsFragment : Fragment() {
     @Composable
     fun DetailsToolbar(isInWatchlist: Boolean, isTwoPane: Boolean, movie: Movie?) {
         TopAppBar(
-            title = { Text(text = "Details") },
+            title = { Text(text = "Details", modifier = Modifier) },
             backgroundColor = MaterialTheme.colors.background,
             elevation = 0.dp,
             modifier = Modifier
                 .statusBarsPadding()
-                .navigationBarsPadding(bottom = false),
+                .navigationBarsPadding(bottom = false).padding(top = 5.dp),
             navigationIcon = {
                 if (!isTwoPane || isFromWatchlist) {
                     IconButton(onClick = { activity?.onBackPressed() }) {

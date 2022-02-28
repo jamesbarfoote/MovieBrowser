@@ -10,13 +10,13 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyVerticalGrid
-import androidx.compose.foundation.lazy.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
@@ -54,6 +54,7 @@ import kotlinx.coroutines.launch
 class WatchlistFragment : Fragment() {
     private val viewModel: WatchlistViewModel by viewModels()
     private val selectedMovie: MutableState<Movie?> = mutableStateOf(null)
+    private val hasNoMovies: MutableState<Boolean> = mutableStateOf(true)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -96,54 +97,68 @@ class WatchlistFragment : Fragment() {
         coroutineScope: CoroutineScope
     ) {
         val lazyPagingItems = viewModel.watchList.collectAsLazyPagingItems()
-        val scrollState = rememberLazyGridState()
+        hasNoMovies.value = (lazyPagingItems.loadState.append.endOfPaginationReached && lazyPagingItems.itemCount == 0)
 
-        LazyVerticalGrid(
-            cells = GridCells.Adaptive(160.dp),
-            state = scrollState,
-            modifier = Modifier
-                .statusBarsPadding()
-                .navigationBarsPadding(end = true, bottom = false),
-            contentPadding = PaddingValues(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            content = {
-            items(lazyPagingItems) { item ->
-                if (item != null) {
-                    PosterWithRating(
-                        movie = item.movie,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(0.65f, true)
-                            ,
-                        onClick = {
-                        findNavController().navigate(
-                            WatchlistFragmentDirections.actionWatchlistFragmentToMovieDetailsFragment(
+        if (hasNoMovies.value) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxSize()) {
+                Text(
+                    text = stringResource(id = R.string.no_watchlist_yet),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(8.dp)
+                )
+            }
+        } else {
+            LazyVerticalGrid(
+                cells = GridCells.Adaptive(160.dp),
+                state = viewModel.lazyGridState,
+                modifier = Modifier
+                    .statusBarsPadding()
+                    .navigationBarsPadding(end = true, bottom = false),
+                contentPadding = PaddingValues(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                content = {
+
+                    items(lazyPagingItems) { item ->
+                        if (item != null) {
+                            PosterWithRating(
                                 movie = item.movie,
-                                origin = "Watchlist"
-                            )
-                        )
-                    },
-                    onLongClick = {
-                        //Show bottom sheet
-                        selectedMovie.value = it
-                        coroutineScope.launch {
-                            if (bottomSheetScaffoldState.bottomSheetState.isCollapsed) {
-                                bottomSheetScaffoldState.bottomSheetState.expand()
-                            } else {
-                                bottomSheetScaffoldState.bottomSheetState.collapse()
-                            }
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .aspectRatio(0.65f, true),
+                                onClick = {
+                                    findNavController().navigate(
+                                        WatchlistFragmentDirections.actionWatchlistFragmentToMovieDetailsFragment(
+                                            movie = item.movie,
+                                            origin = "Watchlist"
+                                        )
+                                    )
+                                },
+                                onLongClick = {
+                                    //Show bottom sheet
+                                    selectedMovie.value = it
+                                    coroutineScope.launch {
+                                        if (bottomSheetScaffoldState.bottomSheetState.isCollapsed) {
+                                            bottomSheetScaffoldState.bottomSheetState.expand()
+                                        } else {
+                                            bottomSheetScaffoldState.bottomSheetState.collapse()
+                                        }
+                                    }
+                                })
                         }
-                    })
-                }
-            }
+                    }
 
-            item {
-                LoadStateView(
-                    loadState = lazyPagingItems.loadState, movieCount = lazyPagingItems.itemCount
-                ) { lazyPagingItems.retry() }
-            }
-        })
+                    item {
+                        LoadStateView(
+                            loadState = lazyPagingItems.loadState,
+                            movieCount = lazyPagingItems.itemCount
+                        ) { lazyPagingItems.retry() }
+                    }
+                })
+        }
     }
 
     @OptIn(ExperimentalFoundationApi::class)

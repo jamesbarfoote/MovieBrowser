@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
@@ -25,8 +26,9 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.os.bundleOf
 import androidx.core.view.doOnNextLayout
 import androidx.fragment.app.*
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemsIndexed
+import androidx.paging.compose.items
 import androidx.slidingpanelayout.widget.SlidingPaneLayout
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.ImagePainter
@@ -43,7 +45,6 @@ import com.appydinos.moviebrowser.ui.moviedetails.view.MovieDetailsFragment
 import com.appydinos.moviebrowser.ui.movielist.viewmodel.MovieListViewModel
 import com.appydinos.moviebrowser.ui.movielist.viewmodel.MoviesSlidingPaneViewModel
 import com.google.accompanist.insets.ProvideWindowInsets
-import com.google.accompanist.insets.statusBarsPadding
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -64,7 +65,7 @@ class MovieListFragment : Fragment() {
         listView.setContent {
             MovieBrowserTheme(windows = null) {
                 ProvideWindowInsets {
-                    Content()
+                    Content(viewModel.lazyListState, viewModel.pagingData.collectAsLazyPagingItems())
                 }
             }
             requireActivity().onBackPressedDispatcher.addCallback(
@@ -98,26 +99,26 @@ class MovieListFragment : Fragment() {
     }
 
     @Composable
-    fun Content() {
-        val lazyPagingItems = viewModel.pagingData.collectAsLazyPagingItems()
-
+    fun Content(state: LazyListState, flow: LazyPagingItems<Movie>) {
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(8.dp),
+            state = state,
             modifier = Modifier
                 .statusBarsPadding()
         ) {
-            itemsIndexed(lazyPagingItems) { _, item ->
-                if (item != null) {
-                    MovieListItem(movie = item) {
-                        openDetails(item.id, binding)
+
+            items(items = flow, key = { movie -> movie.id }, itemContent = { movie ->
+                if (movie != null) {
+                    MovieListItem(movie = movie) {
+                        openDetails(movie.id, binding)
                     }
                 }
-            }
+            })
 
             item {
                 LoadStateView(
-                    loadState = lazyPagingItems.loadState, movieCount = lazyPagingItems.itemCount
-                ) { lazyPagingItems.retry() }
+                    loadState = flow.loadState, movieCount = flow.itemCount
+                ) { flow.retry() }
             }
         }
     }

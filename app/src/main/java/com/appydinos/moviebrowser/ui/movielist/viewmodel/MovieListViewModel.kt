@@ -1,5 +1,6 @@
 package com.appydinos.moviebrowser.ui.movielist.viewmodel
 
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
@@ -12,4 +13,7 @@ class MovieListViewModel @Inject constructor(moviesRepository: MoviesRepository)
 
     val pagingData = moviesRepository.getNowPlayingMovies(30)
         .cachedIn(viewModelScope)
+
+    val lazyListState: LazyListState = LazyListState()
+
 }

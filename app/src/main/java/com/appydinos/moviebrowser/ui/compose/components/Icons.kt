@@ -19,6 +19,7 @@ import com.appydinos.moviebrowser.R
 
 @Composable
 fun RotatingIcon(
+    modifier: Modifier = Modifier,
     @DrawableRes iconId: Int,
     description: String,
     duration: Int = 1000,
@@ -38,7 +39,7 @@ fun RotatingIcon(
         }
     )
 
-    IconButton(onClick = {
+    IconButton(modifier = modifier, onClick = {
         isRotated.value = !isRotated.value
         isEnabled.value = false
         onClicked()
