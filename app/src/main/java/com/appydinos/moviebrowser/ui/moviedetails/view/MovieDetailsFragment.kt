@@ -1,21 +1,25 @@
 package com.appydinos.moviebrowser.ui.moviedetails.view
 
+import android.content.Intent
 import android.content.res.Configuration
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.background
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
@@ -83,12 +87,14 @@ class MovieDetailsFragment : Fragment() {
             null
         }
         if (movie == null) {
+            //We are navigating from the movies list
             val movieId = getMovieId()
             viewLifecycleOwner.lifecycleScope.launchWhenStarted {
                 viewModel.checkIfInWatchlist(movieId)
                 viewModel.getMovieDetails(movieId)
             }
         } else {
+            //We are navigating from the watchlist
             viewLifecycleOwner.lifecycleScope.launchWhenStarted {
                 viewModel.checkIfInWatchlist(movie.id)
                 viewModel.setMovie(movie)
@@ -137,7 +143,6 @@ class MovieDetailsFragment : Fragment() {
                     .verticalScroll(scrollState)
                     .navigationBarsPadding()
                     .statusBarsPadding()
-                    .padding(start = 16.dp, end = 16.dp)
             ) {
                 val showMessageView by viewModel.showMessageView.collectAsState(true)
                 if (showMessageView) {
@@ -155,7 +160,6 @@ class MovieDetailsFragment : Fragment() {
                         viewModel.getMovieDetails(getMovieId())
                     }
                 }
-                val movie by viewModel.movie.collectAsState()
                 movie?.let { DetailsContent(movie = it) }
             }
         }
@@ -169,7 +173,8 @@ class MovieDetailsFragment : Fragment() {
             elevation = 0.dp,
             modifier = Modifier
                 .statusBarsPadding()
-                .navigationBarsPadding(bottom = false).padding(top = 5.dp),
+                .navigationBarsPadding(bottom = false)
+                .padding(top = 5.dp),
             navigationIcon = {
                 if (!isTwoPane || isFromWatchlist) {
                     IconButton(onClick = { activity?.onBackPressed() }) {
@@ -204,6 +209,7 @@ class MovieDetailsFragment : Fragment() {
     @Composable
     fun DetailsContent(movie: Movie) {
         SelectionContainer {
+            val videoScrollState = rememberLazyListState()
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -258,28 +264,77 @@ class MovieDetailsFragment : Fragment() {
                     text = stringResource(id = R.string.rating),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
+                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp, start = 16.dp, end = 16.dp),
                     textAlign = TextAlign.Start
                 )
                 Text(
                     text = movie.getRatingText(),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Normal,
-                    textAlign = TextAlign.Start
-                )
+                    textAlign = TextAlign.Start,
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp),
+                    )
                 Text(
                     text = stringResource(id = R.string.overview),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
+                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp, start = 16.dp, end = 16.dp),
                     textAlign = TextAlign.Start
                 )
                 Text(
                     text = movie.description,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Normal,
-                    textAlign = TextAlign.Start
+                    textAlign = TextAlign.Start,
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp),
+                    )
+
+                Text(
+                    text = stringResource(id = R.string.trailers),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp, start = 16.dp, end = 16.dp),
                 )
+                val videos = movie.videos
+
+                LazyRow(
+                    state = videoScrollState,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    item {
+                        Spacer(modifier = Modifier.padding(start = 0.dp))
+                    }
+                    videos?.forEach { video ->
+                        item {
+                            val videoPainter =
+                                rememberImagePainter(data = video.thumbnail, builder = {
+                                    crossfade(true)
+                                })
+                            Image(
+                                painter = videoPainter,
+                                contentDescription = "${movie.title} trailer",
+                                contentScale = ContentScale.FillWidth,
+                                modifier = Modifier
+                                    .clickable {
+                                        onTrailerClicked(video.url)
+                                    }
+                                    .clip(RoundedCornerShape(5.dp))
+                                    .width(256.dp)
+                                    .height(144.dp)
+                                    .aspectRatio(
+                                        ratio = 1.777f,
+                                        matchHeightConstraintsFirst = false
+                                    )
+                            )
+                        }
+                    }
+                    item {
+                        Spacer(modifier = Modifier.padding(end = 0.dp))
+                    }
+                }
             }
         }
     }
@@ -330,6 +385,16 @@ class MovieDetailsFragment : Fragment() {
 
         MovieBrowserTheme(windows = null) {
             DetailsToolbar(isInWatchlist = true, isTwoPane = false, movie)
+        }
+    }
+
+    private fun onTrailerClicked(url: String) {
+        try {
+            val webpage: Uri = Uri.parse(url)
+            val intent = Intent(Intent.ACTION_VIEW, webpage)
+            startActivity(intent)
+        } catch (ex: Exception) {
+            context?.showShortToast("Failed to open trailer")
         }
     }
 }

@@ -1,13 +1,15 @@
 package com.appydinos.moviebrowser.ui.movielist.viewmodel
 
 import androidx.paging.PagingData
-import androidx.paging.map
+import com.appydinos.moviebrowser.data.model.Movie
 import com.appydinos.moviebrowser.data.model.freeGuyMovieList
 import com.appydinos.moviebrowser.data.repo.MoviesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.*
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -34,6 +36,8 @@ class MovieListViewModelUnitTest {
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         MockitoAnnotations.openMocks(this)
+        `when`(repo.getNowPlayingMovies(30)).thenReturn(flowOf(PagingData.from(
+            listOf(freeGuyMovieList))))
         viewModel = MovieListViewModel(repo)
     }
 
@@ -45,11 +49,8 @@ class MovieListViewModelUnitTest {
     @Test
     fun `getMoviesList - makes call to get now playing movies`() = runTest {
         //When
-        `when`(repo.getNowPlayingMovies(30)).thenReturn(flowOf(PagingData.from(
-            listOf(freeGuyMovieList))))
-
-        //When
-        viewModel.moviesList.first()
+        MutableStateFlow<List<Movie>>(listOf())
+            .flatMapLatest { viewModel.pagingData }
 
         //Then
         advanceUntilIdle()
@@ -59,11 +60,8 @@ class MovieListViewModelUnitTest {
     @Test
     fun `getMoviesList - result is correct`() = runTest {
         //When
-        `when`(repo.getNowPlayingMovies(30)).thenReturn(flowOf(PagingData.from(
-            listOf(freeGuyMovieList))))
-
-        //When
-        val result = viewModel.moviesList.first()
+        val result = MutableStateFlow<List<Movie>>(listOf())
+            .flatMapLatest { viewModel.pagingData }
 
         //Then
         advanceUntilIdle()

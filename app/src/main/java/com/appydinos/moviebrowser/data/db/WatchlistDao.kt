@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.appydinos.moviebrowser.data.model.Movie
+import com.appydinos.moviebrowser.data.model.Video
 
 @Dao
 interface WatchlistDao {
@@ -21,4 +22,7 @@ interface WatchlistDao {
 
     @Query("DELETE FROM Watchlist WHERE movie_id=:movieId")
     fun deleteMovie(movieId: Int)
+
+    @Query("UPDATE Watchlist SET videos = :trailers WHERE movie_id=:movieId")
+    fun updateMovieTrailers(movieId: Int, trailers: List<Video>)
 }

@@ -45,6 +45,7 @@ import com.appydinos.moviebrowser.ui.moviedetails.view.MovieDetailsFragment
 import com.appydinos.moviebrowser.ui.movielist.viewmodel.MovieListViewModel
 import com.appydinos.moviebrowser.ui.movielist.viewmodel.MoviesSlidingPaneViewModel
 import com.google.accompanist.insets.ProvideWindowInsets
+import com.google.accompanist.insets.statusBarsPadding
 import dagger.hilt.android.AndroidEntryPoint
 
 /**

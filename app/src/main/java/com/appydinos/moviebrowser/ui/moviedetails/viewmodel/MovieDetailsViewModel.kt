@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.appydinos.moviebrowser.R
 import com.appydinos.moviebrowser.data.model.Movie
+import com.appydinos.moviebrowser.data.model.Video
 import com.appydinos.moviebrowser.data.repo.IWatchlistRepository
 import com.appydinos.moviebrowser.data.repo.MoviesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -48,13 +49,17 @@ class MovieDetailsViewModel @Inject constructor(
     private val _isInWatchlist = MutableStateFlow(false)
     val isInWatchlist: StateFlow<Boolean> = _isInWatchlist
 
+    private val _videos = MutableStateFlow(listOf<Video>())
+
     fun getMovieDetails(movieId: Int) = viewModelScope.launch {
         try {
             if (movieId < 0) {
                 //Invalid movie ID so show error message
                 showErrorView(errorMessage = "Select a movie to see its details", animation = R.raw.loader_movie, canRetry = false, 1f)
             } else {
+                getMovieTrailers(movieId = movieId)
                 val result = repository.getMovieDetails(movieId)
+
                 if (result == null) {
                     showErrorView("Failed to get movie details", aspectRatio = 0.8f)
                 } else {
@@ -66,6 +71,15 @@ class MovieDetailsViewModel @Inject constructor(
         } catch (ex: Exception) {
             showErrorView("Something went wrong when trying to get the movie details", aspectRatio = 0.8f)
             Timber.e(ex.message.orEmpty())
+        }
+    }
+
+    private fun getMovieTrailers(movieId: Int) = viewModelScope.launch {
+        val result = repository.getMovieVideos(movieId = movieId)
+        _videos.value = result
+        if (_movie.value != null) {
+            //Update the movie object
+            _movie.value = _movie.value?.copy(videos = result)
         }
     }
 
@@ -84,6 +98,13 @@ class MovieDetailsViewModel @Inject constructor(
     }
 
     suspend fun setMovie(movie: Movie) = withContext(Dispatchers.IO) {
+        if (movie.videos.isNullOrEmpty()) {
+            getMovieTrailers(movieId = movie.id).invokeOnCompletion {
+                viewModelScope.launch(Dispatchers.IO) {
+                    _movie.value?.let { thisMovie -> watchlistRepository.updateTrailers(thisMovie) }
+                }
+            }
+        }
         _showDetailsLoader.value = false
         _movie.value = movie
         checkIfInWatchlist(movieId = movie.id)

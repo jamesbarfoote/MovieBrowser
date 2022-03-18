@@ -4,7 +4,9 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.appydinos.moviebrowser.data.model.Movie
+import com.appydinos.moviebrowser.data.model.Video
 import com.appydinos.moviebrowser.data.model.toMovie
+import com.appydinos.moviebrowser.data.model.toVideoList
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -24,5 +26,16 @@ class MoviesRepository @Inject constructor(
             }
         }
         return null
+    }
+
+    @kotlin.jvm.Throws
+    override suspend fun getMovieVideos(movieId: Int): List<Video> {
+        val result = api.getVideos(movieId = movieId)
+        if (result.isSuccessful) {
+            result.body()?.let { videos ->
+                return videos.toVideoList()
+            }
+        }
+        return listOf()
     }
 }
