@@ -10,6 +10,7 @@ import com.appydinos.moviebrowser.data.repo.IWatchlistRepository
 import com.appydinos.moviebrowser.data.repo.MoviesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -57,20 +58,29 @@ class MovieDetailsViewModel @Inject constructor(
                 //Invalid movie ID so show error message
                 showErrorView(errorMessage = "Select a movie to see its details", animation = R.raw.loader_movie, canRetry = false, 1f)
             } else {
+                val result = async { repository.getMovieDetails(movieId) }
                 getMovieTrailers(movieId = movieId)
-                val result = repository.getMovieDetails(movieId)
 
-                if (result == null) {
+                if (result.await() == null) {
                     showErrorView("Failed to get movie details", aspectRatio = 0.8f)
                 } else {
                     _showMessageView.value = false
                 }
                 _showDetailsLoader.value = false
-                _movie.value = result
+                updateMovie(result.await())
             }
         } catch (ex: Exception) {
             showErrorView("Something went wrong when trying to get the movie details", aspectRatio = 0.8f)
             Timber.e(ex.message.orEmpty())
+        }
+    }
+
+    private fun updateMovie(movie: Movie?) {
+        _movie.value = if (!_videos.value.isNullOrEmpty()) {
+            //If the videos come back before the movie details then we need to update the movie
+            movie?.copy(videos = _videos.value)
+        } else {
+            movie
         }
     }
 

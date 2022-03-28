@@ -69,6 +69,8 @@ object AppModule {
         return Room.databaseBuilder(
             context,
             AppDatabase::class.java,
-            "Movie_Browser_DB").build()
+            "Movie_Browser_DB")
+            .fallbackToDestructiveMigration()
+            .build()
     }
 }

@@ -42,6 +42,7 @@ import coil.compose.rememberImagePainter
 import com.airbnb.lottie.compose.*
 import com.appydinos.moviebrowser.R
 import com.appydinos.moviebrowser.data.model.Movie
+import com.appydinos.moviebrowser.data.model.Video
 import com.appydinos.moviebrowser.extensions.showShortToast
 import com.appydinos.moviebrowser.ui.compose.MovieBrowserTheme
 import com.appydinos.moviebrowser.ui.compose.components.MessageView
@@ -209,7 +210,6 @@ class MovieDetailsFragment : Fragment() {
     @Composable
     fun DetailsContent(movie: Movie) {
         SelectionContainer {
-            val videoScrollState = rememberLazyListState()
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -295,46 +295,54 @@ class MovieDetailsFragment : Fragment() {
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(top = 16.dp, bottom = 8.dp, start = 16.dp, end = 16.dp),
                 )
-                val videos = movie.videos
+                Trailers(
+                    videos = movie.videos,
+                    movieTitle = movie.title
+                )
+            }
+        }
+    }
 
-                LazyRow(
-                    state = videoScrollState,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                        .padding(top = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    item {
-                        Spacer(modifier = Modifier.padding(start = 0.dp))
-                    }
-                    videos?.forEach { video ->
-                        item {
-                            val videoPainter =
-                                rememberImagePainter(data = video.thumbnail, builder = {
-                                    crossfade(true)
-                                })
-                            Image(
-                                painter = videoPainter,
-                                contentDescription = "${movie.title} trailer",
-                                contentScale = ContentScale.FillWidth,
-                                modifier = Modifier
-                                    .clickable {
-                                        onTrailerClicked(video.url)
-                                    }
-                                    .clip(RoundedCornerShape(5.dp))
-                                    .width(256.dp)
-                                    .height(144.dp)
-                                    .aspectRatio(
-                                        ratio = 1.777f,
-                                        matchHeightConstraintsFirst = false
-                                    )
+    @Composable
+    fun Trailers(videos: List<Video>?, movieTitle: String) {
+        val videoScrollState = rememberLazyListState()
+
+        LazyRow(
+            state = videoScrollState,
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .padding(top = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            item {
+                Spacer(modifier = Modifier.padding(start = 0.dp))
+            }
+            videos?.forEach { video ->
+                item {
+                    val videoPainter =
+                        rememberImagePainter(data = video.thumbnail, builder = {
+                            crossfade(true)
+                        })
+                    Image(
+                        painter = videoPainter,
+                        contentDescription = "$movieTitle trailer",
+                        contentScale = ContentScale.FillWidth,
+                        modifier = Modifier
+                            .clickable {
+                                onTrailerClicked(video.url)
+                            }
+                            .clip(RoundedCornerShape(5.dp))
+                            .width(256.dp)
+                            .height(144.dp)
+                            .aspectRatio(
+                                ratio = 1.777f,
+                                matchHeightConstraintsFirst = false
                             )
-                        }
-                    }
-                    item {
-                        Spacer(modifier = Modifier.padding(end = 0.dp))
-                    }
+                    )
                 }
+            }
+            item {
+                Spacer(modifier = Modifier.padding(end = 0.dp))
             }
         }
     }
