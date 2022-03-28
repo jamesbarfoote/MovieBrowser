@@ -8,6 +8,7 @@ import com.appydinos.moviebrowser.data.model.Movie
 import com.appydinos.moviebrowser.data.model.Video
 import com.appydinos.moviebrowser.data.repo.IWatchlistRepository
 import com.appydinos.moviebrowser.data.repo.MoviesRepository
+import com.appydinos.moviebrowser.ui.moviedetails.model.MessageState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -31,21 +32,14 @@ class MovieDetailsViewModel @Inject constructor(
     private val _showDetailsLoader = MutableStateFlow(true)
     val showDetailsLoader: StateFlow<Boolean> = _showDetailsLoader
 
-
-    private val _showMessageView = MutableStateFlow(false)
-    val showMessageView: StateFlow<Boolean> = _showMessageView
-
-    private val _messageText = MutableStateFlow("")
-    val messageText: StateFlow<String> = _messageText
-
-    private val _messageAnimation = MutableStateFlow(R.raw.details_error)
-    val messageAnimation: StateFlow<Int> = _messageAnimation
-
-    private val _canRetry = MutableStateFlow(false)
-    val canRetry: StateFlow<Boolean> = _canRetry
-
-    private val _messageAnimationAspectRatio = MutableStateFlow(1f)
-    val messageAnimationAspectRatio: StateFlow<Float> = _messageAnimationAspectRatio
+    private val _messageState = MutableStateFlow(MessageState(
+        showMessageView = false,
+        messageText = "",
+        messageAnimation = R.raw.details_error,
+        animationAspectRatio = 1f,
+        canRetry = false
+    ))
+    val messageState: StateFlow<MessageState> = _messageState
 
     private val _isInWatchlist = MutableStateFlow(false)
     val isInWatchlist: StateFlow<Boolean> = _isInWatchlist
@@ -64,7 +58,7 @@ class MovieDetailsViewModel @Inject constructor(
                 if (result.await() == null) {
                     showErrorView("Failed to get movie details", aspectRatio = 0.8f)
                 } else {
-                    _showMessageView.value = false
+                    _messageState.value = _messageState.value.copy(showMessageView = false)
                 }
                 _showDetailsLoader.value = false
                 updateMovie(result.await())
@@ -95,11 +89,13 @@ class MovieDetailsViewModel @Inject constructor(
 
     private fun showErrorView(errorMessage: String, @RawRes animation: Int = R.raw.details_error, canRetry: Boolean = true, aspectRatio: Float) {
         _showDetailsLoader.value = false
-        _showMessageView.value = true
-        _messageText.value = errorMessage
-        _messageAnimation.value = animation
-        _messageAnimationAspectRatio.value = aspectRatio
-        _canRetry.value = canRetry
+        _messageState.value = _messageState.value.copy(
+            showMessageView = true,
+            messageText = errorMessage,
+            messageAnimation = animation,
+            animationAspectRatio = aspectRatio,
+            canRetry = canRetry
+        )
     }
 
     suspend fun addToWatchList() = withContext(Dispatchers.IO) {
