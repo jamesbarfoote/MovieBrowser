@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -51,8 +52,11 @@ fun SettingsContent(onLogoClicked: () -> Unit, onOSSClicked: () -> Unit) {
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
+                .testTag("All data text")
         )
-        Button(onClick = { onOSSClicked() }, modifier = Modifier.padding(top = 24.dp)) {
+        Button(
+            onClick = { onOSSClicked() },
+            modifier = Modifier.padding(top = 24.dp).testTag("OSS Licenses Button")) {
             Text(stringResource(id = R.string.oss_licenses))
         }
     }

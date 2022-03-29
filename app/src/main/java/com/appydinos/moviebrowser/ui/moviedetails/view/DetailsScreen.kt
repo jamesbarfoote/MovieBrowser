@@ -99,7 +99,6 @@ fun DetailsScreen(
                 .statusBarsPadding()
         ) {
             val currentMessageState by messageState.collectAsState()
-//            val showMessageView by viewModel.showMessageView.collectAsState(true)
             if (currentMessageState.showMessageView) {
                 MessageView(
                     animation = currentMessageState.messageAnimation,

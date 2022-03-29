@@ -34,6 +34,14 @@ class MovieDetailsFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        val movie = try {
+            val args: MovieDetailsFragmentArgs by navArgs()
+            isFromWatchlist = args.origin == "Watchlist"
+            args.movie
+        } catch (ex: java.lang.Exception) {
+            null
+        }
+
         val view = ComposeView(requireContext()).apply {
             setContent {
                 MovieBrowserTheme(windows = activity?.window) {
@@ -66,13 +74,6 @@ class MovieDetailsFragment : Fragment() {
             }
         }
 
-        val movie = try {
-            val args: MovieDetailsFragmentArgs by navArgs()
-            isFromWatchlist = args.origin == "Watchlist"
-            args.movie
-        } catch (ex: java.lang.Exception) {
-            null
-        }
         if (movie == null) {
             //We are navigating from the movies list
             val movieId = getMovieId()
