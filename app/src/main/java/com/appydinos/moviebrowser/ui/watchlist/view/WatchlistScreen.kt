@@ -16,6 +16,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -178,7 +179,8 @@ fun PosterWithRating(
                 .combinedClickable(
                     onClick = { onClick(movie) },
                     onLongClick = { onLongClick(movie) }
-                )
+                ),
+            contentDescription = movie.title
         )
         RatingIcon(rating = movie.rating, modifier = Modifier.constrainAs(rating) {
             start.linkTo(image.start, margin = 4.dp)
@@ -234,6 +236,7 @@ fun LongPressBottomSheetContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp)
+                    .testTag("Bottom sheet title")
             )
             Divider(color = Color.LightGray, thickness = 1.dp, modifier = Modifier.fillMaxWidth())
 

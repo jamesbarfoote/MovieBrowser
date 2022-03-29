@@ -183,7 +183,8 @@ fun DetailsContent(movie: Movie, onTrailerClicked: (String) -> Unit) {
             RoundedCornerImage(
                 painter = painter,
                 height = 350.dp,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                contentDescription = movie.title
             )
 
             Text(

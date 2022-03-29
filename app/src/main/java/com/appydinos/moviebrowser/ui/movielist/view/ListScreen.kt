@@ -89,7 +89,8 @@ fun MovieListItem(movie: Movie, onClick: (Movie) -> Unit) {
                         top.linkTo(parent.top)
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
-                    }
+                    },
+                    contentDescription = movie.title
                 )
                 RatingIcon(rating = movie.rating, modifier = Modifier.constrainAs(rating) {
                     start.linkTo(image.start, margin = 4.dp)

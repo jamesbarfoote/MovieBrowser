@@ -15,7 +15,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun RoundedCornerImage(painter: Painter, height: Dp, modifier: Modifier = Modifier) {
+fun RoundedCornerImage(
+    painter: Painter,
+    height: Dp,
+    modifier: Modifier = Modifier,
+    contentDescription: String) {
+
     Box(
         modifier = modifier
             .wrapContentSize()
@@ -25,7 +30,7 @@ fun RoundedCornerImage(painter: Painter, height: Dp, modifier: Modifier = Modifi
     ) {
         Image(
             painter = painter,
-            contentDescription = null,
+            contentDescription = contentDescription,
             modifier = Modifier
                 .height(height)
                 .wrapContentWidth(),

@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -88,9 +89,10 @@ fun RatingIcon(modifier: Modifier = Modifier, rating: Double) {
     Box(
         modifier = modifier
             .clip(CircleShape)
-            .background(Color(0xFF80072257))
+            .background(Color(0x80072257))
             .border(width = 2.dp, color = Color(0xFF00E676), shape = CircleShape)
             .padding(4.dp)
+            .testTag("RatingIcon")
     ) {
         Text(
             text = rating.toString(),
