@@ -60,6 +60,7 @@ fun MessageView(
                 .fillMaxWidth(0.5f)
                 .wrapContentHeight()
                 .aspectRatio(animationAspectRation, false)
+                .testTag("MessageViewAnimation")
         )
 
         Text(

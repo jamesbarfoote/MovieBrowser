@@ -18,7 +18,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.paging.compose.LazyPagingItems
+import androidx.paging.PagingData
+import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.ImagePainter
@@ -31,14 +32,15 @@ import com.appydinos.moviebrowser.ui.compose.components.RatingIcon
 import com.appydinos.moviebrowser.ui.compose.components.RoundedCornerImage
 import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.insets.statusBarsPadding
+import kotlinx.coroutines.flow.Flow
 
 @Composable
 fun ListScreen(
     state: LazyListState,
-    flow: LazyPagingItems<Movie>,
+    flow: Flow<PagingData<Movie>>,
     onItemClicked: (movieId: Int) -> Unit) {
     //TODO Is the problem that we report a list size of 0 upon rotation?
-
+    val listItems = flow.collectAsLazyPagingItems()
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         state = state,
@@ -46,7 +48,7 @@ fun ListScreen(
             .statusBarsPadding()
     ) {
 
-        items(items = flow, key = { movie -> movie.id }, itemContent = { movie ->
+        items(items = listItems, key = { movie -> movie.id }, itemContent = { movie ->
             if (movie != null) {
                 MovieListItem(movie = movie) {
                     onItemClicked(movie.id)
@@ -56,8 +58,8 @@ fun ListScreen(
 
         item {
             LoadStateView(
-                loadState = flow.loadState, movieCount = flow.itemCount
-            ) { flow.retry() }
+                loadState = listItems.loadState, movieCount = listItems.itemCount
+            ) { listItems.retry() }
         }
     }
 }

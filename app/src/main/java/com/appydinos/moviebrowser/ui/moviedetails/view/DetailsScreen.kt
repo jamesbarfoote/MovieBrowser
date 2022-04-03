@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
@@ -87,7 +88,9 @@ fun DetailsScreen(
                 composition,
                 progress,
                 contentScale = ContentScale.FillWidth,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("DetailsLoader")
             )
         }
         Column(
@@ -105,7 +108,8 @@ fun DetailsScreen(
                     animationAspectRation = currentMessageState.animationAspectRatio,
                     messageText = currentMessageState.messageText,
                     canRetry = currentMessageState.canRetry,
-                    onRetry = onLoadRetry
+                    onRetry = onLoadRetry,
+                    modifier = Modifier.testTag("DetailsMessageView")
                 )
             }
             movie?.let { DetailsContent(movie = it, onTrailerClicked) }
@@ -129,7 +133,8 @@ fun DetailsToolbar(
         modifier = Modifier
             .statusBarsPadding()
             .navigationBarsPadding(bottom = false)
-            .padding(top = 5.dp),
+            .padding(top = 5.dp)
+            .testTag("DetailsToolbar"),
         navigationIcon = {
             if (!isTwoPane || isFromWatchlist) {
                 IconButton(onClick = { onBackPressed() }) {
@@ -266,7 +271,8 @@ fun Trailers(videos: List<Video>?, movieTitle: String, onTrailerClicked: (String
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .padding(top = 8.dp),
+            .padding(top = 8.dp)
+            .testTag("DetailsTrailers"),
         horizontalArrangement = Arrangement.spacedBy(16.dp)) {
         item {
             Spacer(modifier = Modifier.padding(start = 0.dp))
@@ -279,7 +285,7 @@ fun Trailers(videos: List<Video>?, movieTitle: String, onTrailerClicked: (String
                     })
                 Image(
                     painter = videoPainter,
-                    contentDescription = "$movieTitle trailer",
+                    contentDescription = "$movieTitle. ${video.name}",
                     contentScale = ContentScale.FillWidth,
                     modifier = Modifier
                         .clickable {

@@ -8,7 +8,6 @@ import androidx.activity.OnBackPressedCallback
 import androidx.core.os.bundleOf
 import androidx.core.view.doOnNextLayout
 import androidx.fragment.app.*
-import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.slidingpanelayout.widget.SlidingPaneLayout
 import com.appydinos.moviebrowser.R
 import com.appydinos.moviebrowser.databinding.FragmentMovieListBinding
@@ -37,7 +36,7 @@ class MovieListFragment : Fragment() {
         listView.setContent {
             MovieBrowserTheme(windows = null) {
                 ProvideWindowInsets {
-                    ListScreen(viewModel.lazyListState, viewModel.pagingData.collectAsLazyPagingItems()) { movieId ->
+                    ListScreen(viewModel.lazyListState, viewModel.pagingData) { movieId ->
                         openDetails(movieId, binding = binding)
                     }
                 }
