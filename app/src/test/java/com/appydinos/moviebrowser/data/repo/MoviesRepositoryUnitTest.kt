@@ -1,8 +1,6 @@
 package com.appydinos.moviebrowser.data.repo
 
-import com.appydinos.moviebrowser.data.model.MovieResponse
-import com.appydinos.moviebrowser.data.model.freeGuyMovie
-import com.appydinos.moviebrowser.data.model.movieResponse
+import com.appydinos.moviebrowser.data.model.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -68,5 +66,42 @@ class MoviesRepositoryUnitTest {
 
         //Then
         assertEquals(null, result)
+    }
+
+    @Test
+    fun `getMovieVideos - returns videos for movie`() = runTest {
+        //Given
+        `when`(api.getVideos(123)).thenReturn(Response.success(movieVideosResponse))
+
+        val convertedVideos = listOf(
+            convertedTrailer,
+            convertedTrailer.copy(
+                id = "abc123",
+                name = "The other trailer",
+                key = "thisKey",
+                url = "https://www.youtube.com/watch?v=thisKey",
+                thumbnail = "https://img.youtube.com/vi/thisKey/0.jpg"
+            )
+        )
+
+        //When
+        val result = repo.getMovieVideos(123)
+
+        //Then
+        assertEquals(convertedVideos, result)
+    }
+
+    @Test
+    fun `getMovieVideos - returns empty list when not a success`() = runTest {
+        //Given
+        `when`(api.getVideos(123)).thenReturn(Response.error<VideoResponse>(500, "Failed to reach the internet"
+            .toResponseBody("plain/text".toMediaTypeOrNull())
+        ))
+
+        //When
+        val result = repo.getMovieVideos(123)
+
+        //Then
+        assertEquals(listOf<Video>(), result)
     }
 }

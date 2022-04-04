@@ -3,6 +3,7 @@ package com.appydinos.moviebrowser.data.repo
 import com.appydinos.moviebrowser.data.db.AppDatabase
 import com.appydinos.moviebrowser.data.db.WatchlistDao
 import com.appydinos.moviebrowser.data.db.WatchlistItem
+import com.appydinos.moviebrowser.data.model.convertedTrailer
 import com.appydinos.moviebrowser.data.model.freeGuyMovie
 import com.appydinos.moviebrowser.testextensions.capture
 import kotlinx.coroutines.Dispatchers
@@ -89,5 +90,28 @@ class WatchlistRepositoryUnitTest {
 
         //Then
         assertEquals(freeGuyMovie, result)
+    }
+
+    @Test
+    fun updateTrailers() = runTest {
+        //Given
+        val movie = freeGuyMovie.copy(
+            videos = listOf(
+                convertedTrailer,
+                convertedTrailer.copy(
+                    id = "abc123",
+                    name = "The other trailer",
+                    key = "thisKey",
+                    url = "https://www.youtube.com/watch?v=thisKey",
+                    thumbnail = "https://img.youtube.com/vi/thisKey/0.jpg"
+                )
+            )
+        )
+
+        //When
+        repo.updateTrailers(movie)
+
+        //Then
+        verify(watchlistDao).updateMovieTrailers(movieId = movie.id, trailers = movie.videos!!)
     }
 }

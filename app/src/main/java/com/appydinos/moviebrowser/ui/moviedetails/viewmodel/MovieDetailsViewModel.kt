@@ -61,7 +61,8 @@ class MovieDetailsViewModel @Inject constructor(
                     _messageState.value = _messageState.value.copy(showMessageView = false)
                 }
                 _showDetailsLoader.value = false
-                updateMovie(result.await())
+                val details = result.await()
+                updateMovie(details)
             }
         } catch (ex: Exception) {
             showErrorView("Something went wrong when trying to get the movie details", aspectRatio = 0.8f)
@@ -78,7 +79,7 @@ class MovieDetailsViewModel @Inject constructor(
         }
     }
 
-    private fun getMovieTrailers(movieId: Int) = viewModelScope.launch {
+    private fun getMovieTrailers(movieId: Int) = viewModelScope.launch(Dispatchers.IO) {
         val result = repository.getMovieVideos(movieId = movieId)
         _videos.value = result
         if (_movie.value != null) {
