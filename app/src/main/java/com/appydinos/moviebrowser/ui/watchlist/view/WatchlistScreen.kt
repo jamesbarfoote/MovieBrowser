@@ -228,7 +228,7 @@ fun LongPressBottomSheetContent(
             .wrapContentHeight()
             .navigationBarsPadding(end = true, bottom = false)
     ) {
-        Column() {
+        Column {
             Text(
                 text = selectedMovie.value?.title.orEmpty(),
                 fontSize = 24.sp,
@@ -281,5 +281,5 @@ fun LongPressBottomSheetContentPreview() {
         tagLine = "Life's too short to be a background character.",
         votes = 4038
     )
-    LongPressBottomSheetContent(null, null, {})
+    LongPressBottomSheetContent(null, null) {}
 }

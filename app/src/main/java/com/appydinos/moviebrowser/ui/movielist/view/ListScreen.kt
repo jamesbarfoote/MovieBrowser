@@ -39,6 +39,7 @@ fun ListScreen(
     state: LazyListState,
     flow: Flow<PagingData<Movie>>,
     onItemClicked: (movieId: Int) -> Unit) {
+
     //TODO Is the problem that we report a list size of 0 upon rotation?
     val listItems = flow.collectAsLazyPagingItems()
     LazyColumn(

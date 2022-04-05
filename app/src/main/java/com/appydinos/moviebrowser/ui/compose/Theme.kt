@@ -38,7 +38,7 @@ private val LightColorPalette = lightColors(
 fun MovieBrowserTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     windows: Window?,
-    content: @Composable() () -> Unit
+    content: @Composable () -> Unit
 ) {
 
     val colors = if (darkTheme) {

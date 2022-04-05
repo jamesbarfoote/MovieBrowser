@@ -93,4 +93,3 @@ fun FooterView(isLoading: Boolean, errorMessage: String, onRetry: () -> Unit) {
         }
     }
 }
-

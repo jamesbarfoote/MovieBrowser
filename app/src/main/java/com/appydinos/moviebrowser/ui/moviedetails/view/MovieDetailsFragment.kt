@@ -25,11 +25,6 @@ class MovieDetailsFragment : Fragment() {
     private val movieSlidingPaneViewModel: MoviesSlidingPaneViewModel by activityViewModels()
     private var isFromWatchlist: Boolean = false
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setHasOptionsMenu(true)
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
