@@ -42,6 +42,5 @@
     <fragment
         android:id="@+id/settingsFragment"
         android:name="com.appydinos.moviebrowser.ui.settings.SettingsFragment"
-        android:label="fragment_settings"
-        tools:layout="@layout/fragment_settings" />
+        android:label="fragment_settings" />
 </navigation>

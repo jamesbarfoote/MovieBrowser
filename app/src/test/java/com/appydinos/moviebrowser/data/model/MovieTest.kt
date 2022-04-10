@@ -194,3 +194,37 @@ val movieListResponse = MovieListResponse.Result(
     voteAverage = 7.8,
     voteCount = 4038
 )
+
+val movieVideoResponse = VideoResponse.Result(
+    id = "616dbfe453866e0026cd5b37",
+    iso31661 = "US",
+    iso6391 = "en",
+    key = "lnKmAVLC3jU",
+    name = "Official International Trailer",
+    official = true,
+    publishedAt = "2021-10-18T13:33:22.000Z",
+    site = "YouTube",
+    size = 1080,
+    type = "Trailer"
+)
+
+val movieVideosResponse = VideoResponse(
+    id = 425909, results = listOf(
+        movieVideoResponse,
+        movieVideoResponse.copy(
+            id = "abc123",
+            name = "The other trailer",
+            key = "thisKey"
+        )
+    )
+)
+
+val convertedTrailer = Video(
+    id = "616dbfe453866e0026cd5b37",
+    key = "lnKmAVLC3jU",
+    name = "Official International Trailer",
+    site = "YouTube",
+    type = "Trailer",
+    url = "https://www.youtube.com/watch?v=lnKmAVLC3jU",
+    thumbnail = "https://img.youtube.com/vi/lnKmAVLC3jU/0.jpg"
+)

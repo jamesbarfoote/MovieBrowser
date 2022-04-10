@@ -29,7 +29,21 @@ Lottie for animations
 
 Room for local storage
 
-Flexbox for dynamic grid layout
+Flexbox for dynamic grid layout (Classic UI)
+
+Jetpack Compose
+
+Accompanist for window insets and paging extensions (Compose UI)
+
+## Versions
+[Classic UI](https://github.com/jamesbarfoote/MovieBrowser/tree/classic_ui)
+A version of this app written using xml style layouts.
+An APK can be found in the [releases section](https://github.com/jamesbarfoote/MovieBrowser/releases/tag/1.0.0)
+
+[Jetpack Compose version](https://github.com/jamesbarfoote/MovieBrowser/tree/master)
+The app's UI written with Jetpack compose. This is currently a hybrid with the main activity and movie list using xml layouts for the main navigation and sliding pane. Everything else is using Compose
+
+
 
 ## Running the app
 
@@ -45,4 +59,3 @@ class Auth: IAuth {
 }
 
 ```
-

@@ -27,4 +27,8 @@ class WatchlistRepository @Inject constructor(private val appDatabase: AppDataba
     override suspend fun getMovieDetails(movieId: Int): Movie? {
         return appDatabase.watchlistDao().getMovie(movieId)
     }
+
+    override suspend fun updateTrailers(movie: Movie) {
+        appDatabase.watchlistDao().updateMovieTrailers(movieId = movie.id, trailers = movie.videos.orEmpty())
+    }
 }

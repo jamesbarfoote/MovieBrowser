@@ -2,6 +2,7 @@ package com.appydinos.moviebrowser.data.repo
 
 import com.appydinos.moviebrowser.data.model.MovieListResponse
 import com.appydinos.moviebrowser.data.model.MovieResponse
+import com.appydinos.moviebrowser.data.model.VideoResponse
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -14,4 +15,7 @@ interface MovieService {
 
     @GET("movie/{id}")
     suspend fun getMovie(@Path("id") movieId: Int): Response<MovieResponse?>
+
+    @GET("movie/{id}/videos")
+    suspend fun getVideos(@Path("id") movieId: Int): Response<VideoResponse?>
 }

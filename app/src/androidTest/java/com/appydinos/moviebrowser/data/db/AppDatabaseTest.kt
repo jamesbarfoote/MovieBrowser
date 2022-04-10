@@ -31,10 +31,11 @@ class AppDatabaseTest {
         runTime = "1h 55m",
         status = "Released",
         tagLine = "Life's too short to be a background character.",
-        votes = 4038
+        votes = 4038,
+        videos = listOf()
     )
 
-    val testMovie = Movie(
+    private val testMovie = Movie(
         id = 1,
         title = "Red Notice",
         description = "An interpol issued Red Notice is...",
@@ -45,7 +46,8 @@ class AppDatabaseTest {
         runTime = "1h 37m",
         status = "Released",
         tagLine = "Pro and cons",
-        votes = 1388
+        votes = 1388,
+        videos = listOf()
     )
 
     @Before

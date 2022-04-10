@@ -1,89 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
-
-    <com.airbnb.lottie.LottieAnimationView
-        android:id="@+id/lottie_loader"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:lottie_autoPlay="true"
-        app:lottie_loop="true"
-        app:lottie_rawRes="@raw/ripple_loading"
-        app:lottie_speed="0.5"
-        tools:visibility="gone" />
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/error_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="8dp"
-        android:layout_marginTop="8dp"
-        android:visibility="gone">
-
-        <androidx.appcompat.widget.LinearLayoutCompat
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            >
-        <com.airbnb.lottie.LottieAnimationView
-            android:id="@+id/lottie_error"
-            android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:layout_gravity="center"
-            android:adjustViewBounds="true"
-            app:layout_constraintVertical_bias="0"
-            app:layout_constrainedHeight="true"
-            app:layout_constraintWidth_percent="0.5"
-            app:layout_constraintHeight_percent="0.5"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:lottie_autoPlay="true"
-            app:lottie_loop="false"
-            app:lottie_rawRes="@raw/details_error"
-            app:lottie_speed="0.5" />
-
-        <TextView
-            android:id="@+id/error_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="16dp"
-            android:textAlignment="center"
-            android:layout_gravity="center"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/lottie_error" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/error_retry_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/retry"
-            android:layout_gravity="center"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/error_text" />
-        </androidx.appcompat.widget.LinearLayoutCompat>
-    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.slidingpanelayout.widget.SlidingPaneLayout
         android:id="@+id/sliding_pane_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/list"
+        <androidx.compose.ui.platform.ComposeView
+            android:id="@+id/listContent"
             android:name="com.appydinos.moviebrowser.ui.MovieFragment"
-            android:layout_width="350dp"
+            android:layout_width="280dp"
             android:layout_height="match_parent"
             android:layout_gravity="start"
             android:paddingStart="16dp"
@@ -91,9 +21,7 @@
             android:clipToPadding="false"
             android:paddingTop="8dp"
             android:layout_weight="1"
-            app:layoutManager="LinearLayoutManager"
-            tools:context=".ui.movielist.view.MovieListFragment"
-            tools:listitem="@layout/movie_item" />
+            tools:context=".ui.movielist.view.MovieListFragment" />
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/detail_container"

@@ -21,7 +21,8 @@ data class Movie(
     val runTime: String = "",
     val status: String = "",
     val tagLine: String = "",
-    val votes: Int
+    val votes: Int,
+    var videos: List<Video>? = null
 ): Parcelable {
     fun getFullTitleText(): String {
         val year = try {

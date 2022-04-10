@@ -13,4 +13,6 @@ interface IWatchlistRepository {
     suspend fun deleteMovie(movieId: Int)
 
     suspend fun getMovieDetails(movieId: Int): Movie?
+
+    suspend fun updateTrailers(movie: Movie)
 }
