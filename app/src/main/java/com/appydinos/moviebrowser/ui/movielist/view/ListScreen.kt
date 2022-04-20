@@ -18,6 +18,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
@@ -40,8 +41,13 @@ fun ListScreen(
     flow: Flow<PagingData<Movie>>,
     onItemClicked: (movieId: Int) -> Unit) {
 
-    //TODO Is the problem that we report a list size of 0 upon rotation?
     val listItems = flow.collectAsLazyPagingItems()
+
+    //This workaround allows us to handle configuration changes without being spanned to the top
+    //https://issuetracker.google.com/issues/177245496
+    val refresh = listItems.loadState.refresh
+    if (listItems.itemCount == 0 && refresh is LoadState.NotLoading ) return //skip dummy state, waiting next compose
+
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         state = state,

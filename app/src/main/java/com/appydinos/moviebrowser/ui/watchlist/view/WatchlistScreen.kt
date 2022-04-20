@@ -23,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.rememberImagePainter
@@ -92,6 +93,12 @@ fun WatchlistContent(
     onMovieSelected: (Movie) -> Unit
 ) {
     val lazyPagingItems = watchList.collectAsLazyPagingItems()
+
+    //This workaround allows us to handle configuration changes without being spanned to the top
+    //https://issuetracker.google.com/issues/177245496
+    val refresh = lazyPagingItems.loadState.refresh
+    val shouldSkipCurrentState = lazyPagingItems.itemCount == 0 && refresh is LoadState.NotLoading
+
     hasNoMovies.value =
         (lazyPagingItems.loadState.append.endOfPaginationReached && lazyPagingItems.itemCount == 0)
 
@@ -107,7 +114,7 @@ fun WatchlistContent(
                 modifier = Modifier.padding(8.dp)
             )
         }
-    } else {
+    } else if (!shouldSkipCurrentState) {
         LazyVerticalGrid(
             cells = GridCells.Adaptive(160.dp),
             state = lazyGridState,
