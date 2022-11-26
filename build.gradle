@@ -3,7 +3,7 @@ buildscript {
     ext.kotlin_version = '1.7.10'
     ext.nav_version = '2.5.3'
     ext.paging_version = "3.1.1"
-    ext.lottie_version = '5.0.3'
+    ext.lottie_version = '5.2.0'
     ext.room_version = '2.4.3'
     ext.compose_version = "1.3.1"
 
@@ -14,7 +14,7 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:7.3.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'com.google.gms:google-services:4.3.10'
+        classpath 'com.google.gms:google-services:4.3.14'
 
         classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$nav_version"
         classpath "com.google.android.gms:oss-licenses-plugin:0.10.4" //Info is missing in 0.10.5

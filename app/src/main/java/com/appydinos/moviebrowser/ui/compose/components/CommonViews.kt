@@ -54,7 +54,7 @@ fun MessageView(
         )
         LottieAnimation(
             composition,
-            progress,
+            { progress },
             contentScale = ContentScale.FillBounds,
             modifier = Modifier
                 .fillMaxWidth(0.5f)

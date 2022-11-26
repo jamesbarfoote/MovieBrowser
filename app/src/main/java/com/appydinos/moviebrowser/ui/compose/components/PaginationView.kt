@@ -34,7 +34,7 @@ fun LoadStateView(loadState: CombinedLoadStates, movieCount: Int, onRetry: () ->
         )
         LottieAnimation(
             composition,
-            progress,
+            { progress },
             contentScale = ContentScale.FillBounds,
             modifier = Modifier
                 .fillMaxWidth()

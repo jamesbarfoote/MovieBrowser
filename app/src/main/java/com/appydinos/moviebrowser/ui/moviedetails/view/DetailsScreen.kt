@@ -86,7 +86,7 @@ fun DetailsScreen(
             )
             LottieAnimation(
                 composition,
-                progress,
+                { progress },
                 contentScale = ContentScale.FillWidth,
                 modifier = Modifier
                     .fillMaxWidth()
