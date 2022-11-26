@@ -17,8 +17,7 @@
     <fragment
         android:id="@+id/watchlistFragment"
         android:name="com.appydinos.moviebrowser.ui.watchlist.view.WatchlistFragment"
-        android:label="fragment_watchlist"
-        tools:layout="@layout/fragment_watchlist" >
+        android:label="fragment_watchlist" >
         <action
             android:id="@+id/action_watchlistFragment_to_movieDetailsFragment"
             app:destination="@id/movieDetailsFragment" />

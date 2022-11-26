@@ -1,7 +1,6 @@
 package com.appydinos.moviebrowser.ui.watchlist.viewmodel
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.lazy.LazyGridState
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
@@ -26,7 +25,6 @@ class WatchlistViewModel @Inject constructor(private val watchlistRepository: IW
         .flatMapLatest { watchlistRepository.getWatchlist() }
         .cachedIn(viewModelScope)
 
-    @OptIn(ExperimentalFoundationApi::class)
     val lazyGridState: LazyGridState = LazyGridState(0, 0)
 
 }

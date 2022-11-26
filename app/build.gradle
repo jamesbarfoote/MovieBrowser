@@ -9,12 +9,12 @@ plugins {
 }
 
 android {
-    compileSdk 31
+    compileSdk 33
 
     defaultConfig {
         applicationId "com.appydinos.moviebrowser"
         minSdk 21
-        targetSdk 31
+        targetSdk 33
         versionCode 1
         versionName "1.0"
 
@@ -23,12 +23,12 @@ android {
 
     buildTypes {
         release {
+            signingConfig signingConfigs.debug
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
     compileOptions {
-        coreLibraryDesugaringEnabled true
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
@@ -47,14 +47,15 @@ android {
     testOptions {
         unitTests.includeAndroidResources = true
     }
+    namespace 'com.appydinos.moviebrowser'
 }
 
 dependencies {
 
-    implementation 'androidx.core:core-ktx:1.7.0'
+    implementation 'androidx.core:core-ktx:1.9.0'
     implementation 'com.google.android.material:material:1.4.0'
-    implementation 'androidx.appcompat:appcompat:1.4.1'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.3'
+    implementation 'androidx.appcompat:appcompat:1.5.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
     //Network
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
@@ -62,10 +63,10 @@ dependencies {
     implementation "com.squareup.okhttp3:okhttp:4.9.2"
 
     //DI
-    implementation "com.google.dagger:hilt-android:2.40.5"
+    implementation 'com.google.dagger:hilt-android:2.44.2'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
-    kapt "com.google.dagger:hilt-compiler:2.40.5"
+    kapt 'com.google.dagger:hilt-compiler:2.44.2'
 
     //Navigation
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
@@ -73,15 +74,15 @@ dependencies {
     androidTestImplementation "androidx.navigation:navigation-testing:$nav_version"
 
     //Coroutines
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4'
 
     //Glide
-    implementation 'com.github.bumptech.glide:glide:4.12.0'
-    kapt 'com.github.bumptech.glide:compiler:4.12.0'
+    implementation 'com.github.bumptech.glide:glide:4.14.2'
+    kapt 'com.github.bumptech.glide:compiler:4.14.2'
 
     //Lifecycle
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.4.1'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.5.1'
 
     //Paging
     implementation "androidx.paging:paging-runtime:$paging_version"
@@ -96,9 +97,6 @@ dependencies {
     //Open source licenses
     implementation 'com.google.android.gms:play-services-oss-licenses:17.0.0'
 
-    //Make java 8 methods available on older version of android
-    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
-
     //For easy window insets
     implementation "dev.chrisbanes.insetter:insetter:0.6.1"
 
@@ -111,25 +109,25 @@ dependencies {
     implementation "androidx.room:room-paging:$room_version"
 
     //Jetpack Compose
-    implementation 'androidx.activity:activity-compose:1.4.0'
+    implementation 'androidx.activity:activity-compose:1.6.1'
     implementation "androidx.compose.material:material:$compose_version"
     implementation "androidx.compose.animation:animation:$compose_version"
     implementation "androidx.compose.ui:ui-tooling:$compose_version"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.4.1"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.5.1"
     implementation "com.google.accompanist:accompanist-insets:0.22.0-rc"
     implementation "io.coil-kt:coil-compose:1.4.0" //For image loading from the internet
-    implementation "androidx.paging:paging-compose:1.0.0-alpha14"
-    implementation "androidx.constraintlayout:constraintlayout-compose:1.0.0"
+    implementation "androidx.paging:paging-compose:1.0.0-alpha17"
+    implementation "androidx.constraintlayout:constraintlayout-compose:1.0.1"
     implementation "com.google.accompanist:accompanist-pager:0.24.2-alpha"
 
     //Test
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
-    testImplementation "org.mockito:mockito-core:4.1.0"
-    testImplementation 'org.mockito:mockito-inline:4.1.0'
-    testImplementation 'androidx.test:core:1.4.0'
-    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.4'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.0'
+    testImplementation 'org.mockito:mockito-core:4.5.0'
+    testImplementation 'org.mockito:mockito-inline:4.5.0'
+    testImplementation 'androidx.test:core:1.5.0'
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4'
     testImplementation "androidx.room:room-testing:$room_version"
     testImplementation "androidx.arch.core:core-testing:2.1.0"
 
