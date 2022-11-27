@@ -4,6 +4,7 @@ import android.content.res.Configuration
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
@@ -11,6 +12,9 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
@@ -23,14 +27,13 @@ import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import coil.annotation.ExperimentalCoilApi
-import coil.compose.ImagePainter
-import coil.compose.rememberImagePainter
+import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
 import com.appydinos.moviebrowser.data.model.Movie
 import com.appydinos.moviebrowser.ui.compose.MovieBrowserTheme
 import com.appydinos.moviebrowser.ui.compose.components.FooterView
 import com.appydinos.moviebrowser.ui.compose.components.LoadStateView
 import com.appydinos.moviebrowser.ui.compose.components.RatingIcon
-import com.appydinos.moviebrowser.ui.compose.components.RoundedCornerImage
 import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.insets.statusBarsPadding
 import kotlinx.coroutines.flow.Flow
@@ -76,30 +79,32 @@ fun ListScreen(
 fun MovieListItem(movie: Movie, onClick: (Movie) -> Unit) {
     Card(onClick = { onClick(movie) }) {
         Column(modifier = Modifier.padding(16.dp)) {
-            val painter = rememberImagePainter(data = movie.posterURL, builder = {
-                crossfade(true)
-            })
-            if (painter.state is ImagePainter.State.Loading) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                        .height(50.dp)
-                        .width(50.dp)
-                        .padding(top = 175.dp)
-                )
-            }
             ConstraintLayout(modifier = Modifier.align(Alignment.CenterHorizontally)) {
                 val (image, rating) = createRefs()
 
-                RoundedCornerImage(
-                    painter = painter,
-                    height = 300.dp,
-                    modifier = Modifier.constrainAs(image) {
-                        top.linkTo(parent.top)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
+                SubcomposeAsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(movie.posterURL)
+                        .crossfade(true)
+                        .build(),
+                    loading = {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .height(50.dp)
+                                .width(50.dp)
+                                .padding(top = 175.dp)
+                        )
                     },
-                    contentDescription = movie.title
+                    contentDescription = movie.title,
+                    contentScale = ContentScale.FillHeight,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .height(300.dp)
+                        .constrainAs(image) {
+                            top.linkTo(parent.top)
+                            start.linkTo(parent.start)
+                            end.linkTo(parent.end)
+                        }
                 )
                 RatingIcon(rating = movie.rating, modifier = Modifier.constrainAs(rating) {
                     start.linkTo(image.start, margin = 4.dp)

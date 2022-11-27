@@ -1,12 +1,15 @@
 package com.appydinos.moviebrowser.ui.moviedetails.view
 
 import android.content.res.Configuration
-import androidx.compose.foundation.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -15,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -25,9 +29,8 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.annotation.ExperimentalCoilApi
-import coil.compose.ImagePainter
-import coil.compose.rememberImagePainter
+import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
 import com.airbnb.lottie.compose.*
 import com.appydinos.moviebrowser.R
 import com.appydinos.moviebrowser.data.model.Movie
@@ -35,7 +38,6 @@ import com.appydinos.moviebrowser.data.model.Video
 import com.appydinos.moviebrowser.ui.compose.MovieBrowserTheme
 import com.appydinos.moviebrowser.ui.compose.components.MessageView
 import com.appydinos.moviebrowser.ui.compose.components.RotatingIcon
-import com.appydinos.moviebrowser.ui.compose.components.RoundedCornerImage
 import com.appydinos.moviebrowser.ui.moviedetails.model.MessageState
 import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.insets.navigationBarsPadding
@@ -74,7 +76,7 @@ fun DetailsScreen(
                 isFromWatchlist = isFromWatchlist
             )
         }
-    ) {
+    ) { paddingValues ->
         val showLoader by shouldShowLoader.collectAsState(true)
         if (showLoader) {
             val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.ripple_loading))
@@ -90,6 +92,7 @@ fun DetailsScreen(
                 contentScale = ContentScale.FillWidth,
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(paddingValues)
                     .testTag("DetailsLoader")
             )
         }
@@ -163,7 +166,6 @@ fun DetailsToolbar(
     )
 }
 
-@OptIn(ExperimentalCoilApi::class)
 @Composable
 fun DetailsContent(movie: Movie, onTrailerClicked: (String) -> Unit) {
     SelectionContainer {
@@ -172,24 +174,25 @@ fun DetailsContent(movie: Movie, onTrailerClicked: (String) -> Unit) {
                 .fillMaxWidth()
                 .padding(top = 16.dp, bottom = 16.dp)
         ) {
-
-            val painter = rememberImagePainter(data = movie.posterURL, builder = {
-                crossfade(true)
-            })
-            if (painter.state is ImagePainter.State.Loading) {
-                CircularProgressIndicator(
+            SubcomposeAsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(movie.posterURL)
+                    .crossfade(true)
+                    .build(),
+                loading = {
+                    CircularProgressIndicator(
                     modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
                         .height(50.dp)
                         .width(50.dp)
                         .padding(top = 175.dp)
                 )
-            }
-            RoundedCornerImage(
-                painter = painter,
-                height = 350.dp,
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-                contentDescription = movie.title
+                },
+                contentDescription = movie.title,
+                contentScale = ContentScale.FillHeight,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .align(Alignment.CenterHorizontally)
+                    .height(350.dp)
             )
 
             Text(
@@ -273,21 +276,30 @@ fun Trailers(videos: List<Video>?, movieTitle: String, onTrailerClicked: (String
             .wrapContentHeight()
             .padding(top = 8.dp)
             .testTag("DetailsTrailers"),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
         item {
             Spacer(modifier = Modifier.padding(start = 0.dp))
         }
         videos?.forEach { video ->
             item {
-                val videoPainter =
-                    rememberImagePainter(data = video.thumbnail, builder = {
-                        crossfade(true)
-                    })
-                Image(
-                    painter = videoPainter,
+                SubcomposeAsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(video.thumbnail)
+                        .crossfade(true)
+                        .build(),
+                    loading = {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .height(50.dp)
+                                .width(50.dp)
+                                .padding(top = 175.dp)
+                        )
+                    },
                     contentDescription = "$movieTitle. ${video.name}",
                     contentScale = ContentScale.FillWidth,
                     modifier = Modifier
+                        .clip(RoundedCornerShape(5.dp))
                         .clickable {
                             onTrailerClicked(video.url)
                         }
