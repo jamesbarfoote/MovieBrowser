@@ -128,7 +128,9 @@ class MoviePagingSourceUnitTest {
             loadResult is PagingSource.LoadResult.Error
         )
         assertEquals(
-            "Error(throwable=java.lang.Exception: Failed to get movies)",
+            "LoadResult.Error(\n" +
+                    "   throwable: java.lang.Exception: Failed to get movies\n" +
+                    ") ",
             (loadResult as PagingSource.LoadResult.Error).toString()
         )
     }

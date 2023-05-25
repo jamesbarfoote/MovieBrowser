@@ -26,7 +26,6 @@ import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
-import coil.annotation.ExperimentalCoilApi
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.appydinos.moviebrowser.data.model.Movie
@@ -74,7 +73,7 @@ fun ListScreen(
     }
 }
 
-@OptIn(ExperimentalCoilApi::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MovieListItem(movie: Movie, onClick: (Movie) -> Unit) {
     Card(onClick = { onClick(movie) }) {

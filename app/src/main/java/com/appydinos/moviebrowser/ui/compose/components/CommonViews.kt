@@ -96,7 +96,7 @@ fun RatingIcon(modifier: Modifier = Modifier, rating: Double) {
             .testTag("RatingIcon")
     ) {
         Text(
-            text = rating.toString(),
+            text = "%.1f".format(rating),
             color = Color.White,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(4.dp))
