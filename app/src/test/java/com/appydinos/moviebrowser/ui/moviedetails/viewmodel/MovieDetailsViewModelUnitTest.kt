@@ -18,8 +18,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.BDDMockito.given
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.junit.MockitoJUnitRunner
 
@@ -42,7 +42,7 @@ class MovieDetailsViewModelUnitTest {
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         MockitoAnnotations.openMocks(this)
-        viewModel = MovieDetailsViewModel(repo, watchlistRepository)
+        viewModel = MovieDetailsViewModel(repository = repo, watchlistRepository = watchlistRepository, ioDispatcher = testDispatcher)
     }
 
     @After

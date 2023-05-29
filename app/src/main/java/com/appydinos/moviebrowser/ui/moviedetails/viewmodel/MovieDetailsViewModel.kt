@@ -10,19 +10,21 @@ import com.appydinos.moviebrowser.data.repo.IWatchlistRepository
 import com.appydinos.moviebrowser.data.repo.MoviesRepository
 import com.appydinos.moviebrowser.ui.moviedetails.model.MessageState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import javax.inject.Inject
+import javax.inject.Named
 
 @HiltViewModel
 class MovieDetailsViewModel @Inject constructor(
     private val repository: MoviesRepository,
-    private val watchlistRepository: IWatchlistRepository
+    private val watchlistRepository: IWatchlistRepository,
+    @Named("ioDispatcher") private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
 
     private val _movie = MutableStateFlow<Movie?>(null)
@@ -46,23 +48,22 @@ class MovieDetailsViewModel @Inject constructor(
 
     private val _videos = MutableStateFlow(listOf<Video>())
 
-    fun getMovieDetails(movieId: Int) = viewModelScope.launch {
+    fun getMovieDetails(movieId: Int) = viewModelScope.launch(ioDispatcher) {
         try {
             if (movieId < 0) {
                 //Invalid movie ID so show error message
                 showErrorView(errorMessage = "Select a movie to see its details", animation = R.raw.loader_movie, canRetry = false, 1f)
             } else {
-                val result = async { repository.getMovieDetails(movieId) }
+                val result = repository.getMovieDetails(movieId)
                 getMovieTrailers(movieId = movieId)
 
-                if (result.await() == null) {
+                if (result == null) {
                     showErrorView("Failed to get movie details", aspectRatio = 0.8f)
                 } else {
                     _messageState.value = _messageState.value.copy(showMessageView = false)
                 }
                 _showDetailsLoader.value = false
-                val details = result.await()
-                updateMovie(details)
+                updateMovie(result)
             }
         } catch (ex: Exception) {
             showErrorView("Something went wrong when trying to get the movie details", aspectRatio = 0.8f)
@@ -71,7 +72,7 @@ class MovieDetailsViewModel @Inject constructor(
     }
 
     private fun updateMovie(movie: Movie?) {
-        _movie.value = if (!_videos.value.isNullOrEmpty()) {
+        _movie.value = if (_videos.value.isNotEmpty()) {
             //If the videos come back before the movie details then we need to update the movie
             movie?.copy(videos = _videos.value)
         } else {
@@ -79,7 +80,7 @@ class MovieDetailsViewModel @Inject constructor(
         }
     }
 
-    private fun getMovieTrailers(movieId: Int) = viewModelScope.launch(Dispatchers.IO) {
+    private fun getMovieTrailers(movieId: Int) = viewModelScope.launch(ioDispatcher) {
         val result = repository.getMovieVideos(movieId = movieId)
         _videos.value = result
         if (_movie.value != null) {
@@ -99,12 +100,14 @@ class MovieDetailsViewModel @Inject constructor(
         )
     }
 
-    suspend fun addToWatchList() = withContext(Dispatchers.IO) {
-        _isInWatchlist.value = true
-        movie.value?.let { watchlistRepository.addMovie(it) }
+    fun addToWatchList() {
+        viewModelScope.launch(ioDispatcher) {
+            _isInWatchlist.value = true
+            movie.value?.let { watchlistRepository.addMovie(it) }
+        }
     }
 
-    suspend fun setMovie(movie: Movie) = withContext(Dispatchers.IO) {
+    suspend fun setMovie(movie: Movie) = withContext(ioDispatcher) {
         if (movie.videos.isNullOrEmpty()) {
             getMovieTrailers(movieId = movie.id).invokeOnCompletion {
                 viewModelScope.launch(Dispatchers.IO) {
@@ -117,14 +120,16 @@ class MovieDetailsViewModel @Inject constructor(
         checkIfInWatchlist(movieId = movie.id)
     }
 
-    suspend fun removeFromWatchlist() = withContext(Dispatchers.IO) {
-        movie.value?.let {
-            watchlistRepository.deleteMovie(it.id)
-            _isInWatchlist.value = false
+    fun removeFromWatchlist() {
+        viewModelScope.launch(ioDispatcher) {
+            movie.value?.let {
+                watchlistRepository.deleteMovie(it.id)
+                _isInWatchlist.value = false
+            }
         }
     }
 
-    suspend fun checkIfInWatchlist(movieId: Int) = withContext(Dispatchers.IO) {
+    suspend fun checkIfInWatchlist(movieId: Int) = withContext(ioDispatcher) {
         val movie = watchlistRepository.getMovieDetails(movieId)
         _isInWatchlist.value = movie != null
     }

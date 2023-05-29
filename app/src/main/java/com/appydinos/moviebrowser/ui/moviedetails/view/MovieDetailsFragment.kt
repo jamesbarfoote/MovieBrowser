@@ -6,11 +6,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.navArgs
 import com.appydinos.moviebrowser.extensions.showShortToast
 import com.appydinos.moviebrowser.ui.compose.MovieBrowserTheme
@@ -18,6 +21,7 @@ import com.appydinos.moviebrowser.ui.moviedetails.viewmodel.MovieDetailsViewMode
 import com.appydinos.moviebrowser.ui.movielist.viewmodel.MoviesSlidingPaneViewModel
 import com.google.accompanist.insets.ProvideWindowInsets
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MovieDetailsFragment : Fragment() {
@@ -39,6 +43,7 @@ class MovieDetailsFragment : Fragment() {
 
         val view = ComposeView(requireContext()).apply {
             setContent {
+                val scope = rememberCoroutineScope()
                 MovieBrowserTheme(windows = activity?.window) {
                     ProvideWindowInsets {
                         DetailsScreen(
@@ -52,15 +57,13 @@ class MovieDetailsFragment : Fragment() {
                             onTrailerClicked = { url -> onTrailerClicked(url) },
                             removeFromWatchlist = {
                                 context?.showShortToast("Movie removed from Watchlist")
-                                viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-                                    viewModel.removeFromWatchlist()
-                                }
+                                viewModel.removeFromWatchlist()
                             },
                             addToWatchlist = {
                                 context?.showShortToast("Movie added to Watchlist")
-                                viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+//                                viewLifecycleOwner.lifecycleScope.launchWhenStarted {
                                     viewModel.addToWatchList()
-                                }
+//                                }
                             },
                             onLoadRetry = { viewModel.getMovieDetails(getMovieId()) }
                         )
@@ -72,15 +75,19 @@ class MovieDetailsFragment : Fragment() {
         if (movie == null) {
             //We are navigating from the movies list
             val movieId = getMovieId()
-            viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-                viewModel.checkIfInWatchlist(movieId)
-                viewModel.getMovieDetails(movieId)
+            lifecycleScope.launch {
+                lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    viewModel.checkIfInWatchlist(movieId)
+                    viewModel.getMovieDetails(movieId)
+                }
             }
         } else {
             //We are navigating from the watchlist
-            viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-                viewModel.checkIfInWatchlist(movie.id)
-                viewModel.setMovie(movie)
+            lifecycleScope.launch {
+                lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    viewModel.checkIfInWatchlist(movie.id)
+                    viewModel.setMovie(movie)
+                }
             }
         }
         return view
