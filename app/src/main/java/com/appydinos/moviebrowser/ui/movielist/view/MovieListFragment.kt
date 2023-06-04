@@ -7,7 +7,11 @@ import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.core.os.bundleOf
 import androidx.core.view.doOnNextLayout
-import androidx.fragment.app.*
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentTransaction
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.commit
+import androidx.fragment.app.viewModels
 import androidx.slidingpanelayout.widget.SlidingPaneLayout
 import com.appydinos.moviebrowser.R
 import com.appydinos.moviebrowser.databinding.FragmentMovieListBinding
@@ -15,7 +19,6 @@ import com.appydinos.moviebrowser.ui.compose.MovieBrowserTheme
 import com.appydinos.moviebrowser.ui.moviedetails.view.MovieDetailsFragment
 import com.appydinos.moviebrowser.ui.movielist.viewmodel.MovieListViewModel
 import com.appydinos.moviebrowser.ui.movielist.viewmodel.MoviesSlidingPaneViewModel
-import com.google.accompanist.insets.ProvideWindowInsets
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -35,10 +38,8 @@ class MovieListFragment : Fragment() {
         val listView = binding.listContent
         listView.setContent {
             MovieBrowserTheme(windows = null) {
-                ProvideWindowInsets {
-                    ListScreen(viewModel.lazyListState, viewModel.pagingData) { movieId ->
-                        openDetails(movieId, binding = binding)
-                    }
+                ListScreen(viewModel.lazyListState, viewModel.pagingData) { movieId ->
+                    openDetails(movieId, binding = binding)
                 }
             }
             requireActivity().onBackPressedDispatcher.addCallback(

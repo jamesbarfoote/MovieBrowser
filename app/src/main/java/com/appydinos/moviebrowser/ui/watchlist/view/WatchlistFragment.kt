@@ -7,12 +7,14 @@ import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.appydinos.moviebrowser.ui.compose.MovieBrowserTheme
 import com.appydinos.moviebrowser.ui.watchlist.viewmodel.WatchlistViewModel
-import com.google.accompanist.insets.ProvideWindowInsets
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 /**
  * A simple screen that shows the users watch listed movies
@@ -28,27 +30,27 @@ class WatchlistFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 MovieBrowserTheme(windows = null) {
-                    ProvideWindowInsets {
-                        WatchlistScreen(
-                            watchList = viewModel.watchList,
-                            lazyGridState = viewModel.lazyGridState,
-                            onDeleteMovie = { selectedMovie ->
-                                viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+                    WatchlistScreen(
+                        watchList = viewModel.watchList,
+                        lazyGridState = viewModel.lazyGridState,
+                        onDeleteMovie = { selectedMovie ->
+                            viewLifecycleOwner.lifecycleScope.launch {
+                                repeatOnLifecycle(Lifecycle.State.STARTED) {
                                     viewModel.deleteMovie(
                                         selectedMovie.id
                                     )
                                 }
-                            },
-                            onMovieSelected = { movie ->
-                                findNavController().navigate(
-                                    WatchlistFragmentDirections.actionWatchlistFragmentToMovieDetailsFragment(
-                                        movie = movie,
-                                        origin = "Watchlist"
-                                    )
-                                )
                             }
-                        )
-                    }
+                        },
+                        onMovieSelected = { movie ->
+                            findNavController().navigate(
+                                WatchlistFragmentDirections.actionWatchlistFragmentToMovieDetailsFragment(
+                                    movie = movie,
+                                    origin = "Watchlist"
+                                )
+                            )
+                        }
+                    )
                 }
             }
         }

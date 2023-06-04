@@ -47,9 +47,6 @@ import com.appydinos.moviebrowser.ui.compose.MovieBrowserTheme
 import com.appydinos.moviebrowser.ui.compose.components.MessageView
 import com.appydinos.moviebrowser.ui.compose.components.RotatingIcon
 import com.appydinos.moviebrowser.ui.moviedetails.model.MessageState
-import com.google.accompanist.insets.ProvideWindowInsets
-import com.google.accompanist.insets.navigationBarsPadding
-import com.google.accompanist.insets.statusBarsPadding
 import kotlinx.coroutines.flow.StateFlow
 
 @Composable
@@ -110,7 +107,7 @@ fun DetailsScreen(
                 .background(MaterialTheme.colorScheme.surface)
                 .verticalScroll(scrollState)
                 .navigationBarsPadding()
-                .statusBarsPadding()
+                .systemBarsPadding()
         ) {
             val currentMessageState by messageState.collectAsState()
             if (currentMessageState.showMessageView) {
@@ -142,8 +139,7 @@ fun DetailsToolbar(
         title = { Text(text = "Details", modifier = Modifier) },
         modifier = Modifier
             .statusBarsPadding()
-            .navigationBarsPadding(bottom = false)
-            .padding(top = 5.dp)
+            .navigationBarsPadding()
             .testTag("DetailsToolbar"),
         navigationIcon = {
             if (!isTwoPane || isFromWatchlist) {
@@ -346,9 +342,7 @@ fun DetailsContentPreview() {
     )
 
     MovieBrowserTheme(windows = null) {
-        ProvideWindowInsets {
-            DetailsContent(movie) {}
-        }
+        DetailsContent(movie) {}
     }
 }
 

@@ -49,8 +49,6 @@ import com.appydinos.moviebrowser.ui.compose.MovieBrowserTheme
 import com.appydinos.moviebrowser.ui.compose.components.LoadStateView
 import com.appydinos.moviebrowser.ui.compose.components.RatingIcon
 import com.appydinos.moviebrowser.ui.compose.components.RoundedCornerImage
-import com.google.accompanist.insets.navigationBarsPadding
-import com.google.accompanist.insets.statusBarsPadding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
@@ -135,7 +133,7 @@ fun WatchlistContent(
             state = lazyGridState,
             modifier = Modifier
                 .statusBarsPadding()
-                .navigationBarsPadding(end = true, bottom = false),
+                .navigationBarsPadding(),
             contentPadding = PaddingValues(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -251,7 +249,7 @@ fun LongPressBottomSheetContent(
         Modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .navigationBarsPadding(end = true, bottom = false)
+            .navigationBarsPadding()
     ) {
         Column {
             Text(
@@ -272,7 +270,7 @@ fun LongPressBottomSheetContent(
                     .padding(8.dp),
                 shape = RoundedCornerShape(16.dp),
                 contentPadding = PaddingValues(8.dp),
-                colors = ButtonDefaults.buttonColors(contentColor = Color(0xFFFF5252)),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5252)),
                 onClick = {
                     selectedMovie.value?.let { movie -> onDeleteMovie(movie) }
                     coroutineScope?.launch {

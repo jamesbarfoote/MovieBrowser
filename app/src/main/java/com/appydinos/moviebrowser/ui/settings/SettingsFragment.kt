@@ -11,7 +11,6 @@ import androidx.fragment.app.Fragment
 import com.appydinos.moviebrowser.R
 import com.appydinos.moviebrowser.extensions.showShortToast
 import com.appydinos.moviebrowser.ui.compose.MovieBrowserTheme
-import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 
 class SettingsFragment : Fragment() {
@@ -23,19 +22,17 @@ class SettingsFragment : Fragment() {
         val view = ComposeView(requireContext()).apply {
             setContent {
                 MovieBrowserTheme(windows = activity?.window) {
-                    ProvideWindowInsets {
-                        SettingsContent(
-                            onLogoClicked = { onTMDBLogoClicked() },
-                            onOSSClicked = {
-                                startActivity(
-                                    Intent(
-                                        requireContext(),
-                                        OssLicensesMenuActivity::class.java
-                                    )
+                    SettingsContent(
+                        onLogoClicked = { onTMDBLogoClicked() },
+                        onOSSClicked = {
+                            startActivity(
+                                Intent(
+                                    requireContext(),
+                                    OssLicensesMenuActivity::class.java
                                 )
-                            }
-                        )
-                    }
+                            )
+                        }
+                    )
                 }
             }
         }

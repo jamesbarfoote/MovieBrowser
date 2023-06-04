@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -19,7 +18,6 @@ import com.appydinos.moviebrowser.extensions.showShortToast
 import com.appydinos.moviebrowser.ui.compose.MovieBrowserTheme
 import com.appydinos.moviebrowser.ui.moviedetails.viewmodel.MovieDetailsViewModel
 import com.appydinos.moviebrowser.ui.movielist.viewmodel.MoviesSlidingPaneViewModel
-import com.google.accompanist.insets.ProvideWindowInsets
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -43,31 +41,26 @@ class MovieDetailsFragment : Fragment() {
 
         val view = ComposeView(requireContext()).apply {
             setContent {
-                val scope = rememberCoroutineScope()
                 MovieBrowserTheme(windows = activity?.window) {
-                    ProvideWindowInsets {
-                        DetailsScreen(
-                            inWatchlist = viewModel.isInWatchlist,
-                            twoPane = movieSlidingPaneViewModel.isTwoPane,
-                            currentMovie = viewModel.movie,
-                            shouldShowLoader = viewModel.showDetailsLoader,
-                            messageState = viewModel.messageState,
-                            isFromWatchlist = isFromWatchlist,
-                            onBackPressed = { activity?.onBackPressed() },
-                            onTrailerClicked = { url -> onTrailerClicked(url) },
-                            removeFromWatchlist = {
-                                context?.showShortToast("Movie removed from Watchlist")
-                                viewModel.removeFromWatchlist()
-                            },
-                            addToWatchlist = {
-                                context?.showShortToast("Movie added to Watchlist")
-//                                viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-                                    viewModel.addToWatchList()
-//                                }
-                            },
-                            onLoadRetry = { viewModel.getMovieDetails(getMovieId()) }
-                        )
-                    }
+                    DetailsScreen(
+                        inWatchlist = viewModel.isInWatchlist,
+                        twoPane = movieSlidingPaneViewModel.isTwoPane,
+                        currentMovie = viewModel.movie,
+                        shouldShowLoader = viewModel.showDetailsLoader,
+                        messageState = viewModel.messageState,
+                        isFromWatchlist = isFromWatchlist,
+                        onBackPressed = { activity?.onBackPressed() },
+                        onTrailerClicked = { url -> onTrailerClicked(url) },
+                        removeFromWatchlist = {
+                            context?.showShortToast("Movie removed from Watchlist")
+                            viewModel.removeFromWatchlist()
+                        },
+                        addToWatchlist = {
+                            context?.showShortToast("Movie added to Watchlist")
+                            viewModel.addToWatchList()
+                        },
+                        onLoadRetry = { viewModel.getMovieDetails(getMovieId()) }
+                    )
                 }
             }
         }
@@ -75,16 +68,16 @@ class MovieDetailsFragment : Fragment() {
         if (movie == null) {
             //We are navigating from the movies list
             val movieId = getMovieId()
-            lifecycleScope.launch {
-                lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewLifecycleOwner.lifecycleScope.launch {
+                repeatOnLifecycle(Lifecycle.State.STARTED) {
                     viewModel.checkIfInWatchlist(movieId)
                     viewModel.getMovieDetails(movieId)
                 }
             }
         } else {
             //We are navigating from the watchlist
-            lifecycleScope.launch {
-                lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewLifecycleOwner.lifecycleScope.launch {
+                repeatOnLifecycle(Lifecycle.State.STARTED) {
                     viewModel.checkIfInWatchlist(movie.id)
                     viewModel.setMovie(movie)
                 }

@@ -24,7 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.semantics.isContainer
+import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -47,8 +47,6 @@ import com.appydinos.moviebrowser.ui.compose.MovieBrowserTheme
 import com.appydinos.moviebrowser.ui.compose.components.FooterView
 import com.appydinos.moviebrowser.ui.compose.components.LoadStateView
 import com.appydinos.moviebrowser.ui.compose.components.RatingIcon
-import com.google.accompanist.insets.ProvideWindowInsets
-import com.google.accompanist.insets.statusBarsPadding
 import kotlinx.coroutines.flow.Flow
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,7 +63,35 @@ fun ListScreen(
     val refresh = listItems.loadState.refresh
     if (listItems.itemCount == 0 && refresh is LoadState.NotLoading ) return //skip dummy state, waiting next compose
 
-    MovieListView(state =state, listItems = listItems, onItemClicked = { onItemClicked(it) })
+    var text by rememberSaveable { mutableStateOf("") }
+    var active by rememberSaveable { mutableStateOf(false) }
+
+    Box(Modifier.fillMaxSize()) {
+        // Talkback focus order sorts based on x and y position before considering z-index. The
+        // extra Box with semantics and fillMaxWidth is a workaround to get the search bar to focus
+        // before the content.
+        Box(Modifier.semantics { isTraversalGroup = true }.zIndex(1f).fillMaxWidth()) {
+            SearchBar(
+                modifier = Modifier.align(Alignment.TopCenter),
+                query = text,
+                onQueryChange = { text = it },
+                onSearch = { active = false },
+                active = active,
+                onActiveChange = {
+                    active = it
+                },
+                placeholder = { Text("Hinted search text") },
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                trailingIcon = { Icon(Icons.Default.MoreVert, contentDescription = null) },
+            ) {
+
+            }
+        }
+        MovieListView(
+            state = state,
+            listItems = listItems,
+            onItemClicked = { onItemClicked(it) })
+    }
 }
 
 @Composable
@@ -168,8 +194,6 @@ fun MovieContentPreview() {
     )
 
     MovieBrowserTheme(windows = null) {
-        ProvideWindowInsets {
-            MovieListItem(movie) {}
-        }
+        MovieListItem(movie) {}
     }
 }

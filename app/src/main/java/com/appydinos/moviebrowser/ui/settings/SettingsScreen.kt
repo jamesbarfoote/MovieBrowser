@@ -4,7 +4,9 @@ import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -23,9 +25,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.appydinos.moviebrowser.R
 import com.appydinos.moviebrowser.ui.compose.MovieBrowserTheme
-import com.google.accompanist.insets.ProvideWindowInsets
-import com.google.accompanist.insets.navigationBarsPadding
-import com.google.accompanist.insets.statusBarsPadding
 
 @Composable
 fun SettingsContent(onLogoClicked: () -> Unit, onOSSClicked: () -> Unit) {
@@ -67,8 +66,6 @@ fun SettingsContent(onLogoClicked: () -> Unit, onOSSClicked: () -> Unit) {
 @Composable
 fun SettingsContentPreview() {
     MovieBrowserTheme(windows = null) {
-        ProvideWindowInsets {
-            SettingsContent({}, {})
-        }
+        SettingsContent({}, {})
     }
 }
