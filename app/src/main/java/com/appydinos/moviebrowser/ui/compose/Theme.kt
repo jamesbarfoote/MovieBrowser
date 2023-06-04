@@ -1,13 +1,17 @@
 package com.appydinos.moviebrowser.ui.compose
 
+import android.os.Build
 import android.view.Window
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 
 private val LightColors = lightColorScheme(
     primary = md_theme_light_primary,
@@ -77,22 +81,29 @@ private val DarkColors = darkColorScheme(
 @Composable
 fun MovieBrowserTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
+    dynamicColor: Boolean = true,
     windows: Window?,
     content: @Composable () -> Unit
 ) {
 
-    val colors = if (darkTheme) {
-        DarkColors
-    } else {
-        LightColors
+    val isDynamicColor = dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+    val colorScheme = when {
+        isDynamicColor && darkTheme -> {
+            dynamicDarkColorScheme(LocalContext.current)
+        }
+        isDynamicColor && !darkTheme -> {
+            dynamicLightColorScheme(LocalContext.current)
+        }
+        darkTheme -> DarkColors
+        else -> LightColors
     }
 
     MaterialTheme(
-        colorScheme = colors,
+        colorScheme = colorScheme,
         shapes = Shapes,
         content = content
     )
 
-    windows?.statusBarColor = colors.surface.toArgb()
+    windows?.statusBarColor = colorScheme.surface.toArgb()
     windows?.navigationBarColor = Transparent.toArgb()
 }
