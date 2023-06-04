@@ -5,27 +5,41 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.SearchBar
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.isContainer
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.paging.LoadState
 import androidx.paging.PagingData
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.items
+import androidx.paging.compose.itemContentType
+import androidx.paging.compose.itemKey
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.appydinos.moviebrowser.data.model.Movie
@@ -37,6 +51,7 @@ import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.insets.statusBarsPadding
 import kotlinx.coroutines.flow.Flow
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListScreen(
     state: LazyListState,
@@ -50,20 +65,29 @@ fun ListScreen(
     val refresh = listItems.loadState.refresh
     if (listItems.itemCount == 0 && refresh is LoadState.NotLoading ) return //skip dummy state, waiting next compose
 
+    MovieListView(state =state, listItems = listItems, onItemClicked = { onItemClicked(it) })
+}
+
+@Composable
+fun MovieListView(state: LazyListState, listItems: LazyPagingItems<Movie>, onItemClicked: (movieId: Int) -> Unit) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         state = state,
-        modifier = Modifier
-            .statusBarsPadding()
+        modifier = Modifier.statusBarsPadding()
     ) {
 
-        items(items = listItems, key = { movie -> movie.id }, itemContent = { movie ->
-            if (movie != null) {
-                MovieListItem(movie = movie) {
-                    onItemClicked(movie.id)
+        items(
+            count = listItems.itemCount,
+            key = listItems.itemKey(key = { movie -> movie.id }),
+            contentType = listItems.itemContentType()
+        ) { index ->
+            val item = listItems[index]
+            if (item != null) {
+                MovieListItem(movie = item) {
+                    onItemClicked(item.id)
                 }
             }
-        })
+        }
 
         item {
             LoadStateView(
@@ -73,10 +97,10 @@ fun ListScreen(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MovieListItem(movie: Movie, onClick: (Movie) -> Unit) {
-    Card(onClick = { onClick(movie) }) {
+    ElevatedCard(onClick = { onClick(movie) }) {
         Column(modifier = Modifier.padding(16.dp)) {
             ConstraintLayout(modifier = Modifier.align(Alignment.CenterHorizontally)) {
                 val (image, rating) = createRefs()

@@ -11,6 +11,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -99,7 +107,7 @@ fun DetailsScreen(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
-                .background(MaterialTheme.colors.surface)
+                .background(MaterialTheme.colorScheme.surface)
                 .verticalScroll(scrollState)
                 .navigationBarsPadding()
                 .statusBarsPadding()
@@ -120,6 +128,7 @@ fun DetailsScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailsToolbar(
     isInWatchlist: Boolean,
@@ -131,8 +140,6 @@ fun DetailsToolbar(
     addToWatchlist: () -> Unit) {
     TopAppBar(
         title = { Text(text = "Details", modifier = Modifier) },
-        backgroundColor = MaterialTheme.colors.background,
-        elevation = 0.dp,
         modifier = Modifier
             .statusBarsPadding()
             .navigationBarsPadding(bottom = false)

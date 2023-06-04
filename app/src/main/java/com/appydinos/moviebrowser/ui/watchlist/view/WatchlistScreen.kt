@@ -9,6 +9,16 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.BottomSheetScaffoldState
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SheetState
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -16,6 +26,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -26,7 +39,8 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.appydinos.moviebrowser.R
 import com.appydinos.moviebrowser.data.db.WatchlistItem
 import com.appydinos.moviebrowser.data.model.Movie
@@ -44,7 +58,7 @@ import kotlinx.coroutines.launch
 private val selectedMovie: MutableState<Movie?> = mutableStateOf(null)
 private val hasNoMovies: MutableState<Boolean> = mutableStateOf(true)
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WatchlistScreen(
     watchList: Flow<PagingData<WatchlistItem>>,
@@ -53,7 +67,7 @@ fun WatchlistScreen(
     onMovieSelected: (Movie) -> Unit
 ) {
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
-        bottomSheetState = BottomSheetState(BottomSheetValue.Collapsed)
+        bottomSheetState = SheetState(skipPartiallyExpanded = false, initialValue = SheetValue.Hidden)
     )
     val coroutineScope = rememberCoroutineScope()
     BottomSheetScaffold(
@@ -83,7 +97,7 @@ fun WatchlistScreen(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WatchlistContent(
     bottomSheetScaffoldState: BottomSheetScaffoldState,
@@ -98,6 +112,7 @@ fun WatchlistContent(
     //https://issuetracker.google.com/issues/177245496
     val refresh = lazyPagingItems.loadState.refresh
     val shouldSkipCurrentState = lazyPagingItems.itemCount == 0 && refresh is LoadState.NotLoading
+    val haptics = LocalHapticFeedback.current
 
     hasNoMovies.value =
         (lazyPagingItems.loadState.append.endOfPaginationReached && lazyPagingItems.itemCount == 0)
@@ -137,13 +152,14 @@ fun WatchlistContent(
                                 onMovieSelected(it)
                             },
                             onLongClick = {
+                                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                                 //Show bottom sheet
                                 selectedMovie.value = it
                                 coroutineScope.launch {
-                                    if (bottomSheetScaffoldState.bottomSheetState.isCollapsed) {
+                                    if (!bottomSheetScaffoldState.bottomSheetState.isVisible) {
                                         bottomSheetScaffoldState.bottomSheetState.expand()
                                     } else {
-                                        bottomSheetScaffoldState.bottomSheetState.collapse()
+                                        bottomSheetScaffoldState.bottomSheetState.hide()
                                     }
                                 }
                             })
@@ -168,9 +184,11 @@ fun PosterWithRating(
     onClick: (Movie) -> Unit,
     onLongClick: (Movie) -> Unit
 ) {
-    val painter = rememberImagePainter(data = movie.posterURL, builder = {
-        crossfade(true)
-    })
+    val painter = rememberAsyncImagePainter(
+        ImageRequest.Builder(LocalContext.current).data(data = movie.posterURL).apply(block = fun ImageRequest.Builder.() {
+            crossfade(true)
+        }).build()
+    )
 
     ConstraintLayout(modifier = modifier) {
         val (image, rating) = createRefs()
@@ -222,7 +240,7 @@ fun PosterPreview() {
     }
 }
 
-@ExperimentalMaterialApi
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LongPressBottomSheetContent(
     bottomSheetScaffoldState: BottomSheetScaffoldState?,
@@ -254,11 +272,11 @@ fun LongPressBottomSheetContent(
                     .padding(8.dp),
                 shape = RoundedCornerShape(16.dp),
                 contentPadding = PaddingValues(8.dp),
-                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFFF5252)),
+                colors = ButtonDefaults.buttonColors(contentColor = Color(0xFFFF5252)),
                 onClick = {
                     selectedMovie.value?.let { movie -> onDeleteMovie(movie) }
                     coroutineScope?.launch {
-                        bottomSheetScaffoldState?.bottomSheetState?.collapse()
+                        bottomSheetScaffoldState?.bottomSheetState?.hide()
                     }
                 }) {
                 Text(
@@ -271,7 +289,7 @@ fun LongPressBottomSheetContent(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
 fun LongPressBottomSheetContentPreview() {
