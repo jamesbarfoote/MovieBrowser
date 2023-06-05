@@ -2,6 +2,7 @@ package com.appydinos.moviebrowser.ui.movielist.view
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -9,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
@@ -22,7 +24,9 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction.Companion.Search
@@ -40,7 +45,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -48,12 +52,14 @@ import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
+import com.appydinos.moviebrowser.R
 import com.appydinos.moviebrowser.data.model.Movie
 import com.appydinos.moviebrowser.ui.compose.MovieBrowserTheme
 import com.appydinos.moviebrowser.ui.compose.components.FooterView
 import com.appydinos.moviebrowser.ui.compose.components.LoadStateView
 import com.appydinos.moviebrowser.ui.compose.components.RatingIcon
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 @Composable
@@ -64,16 +70,14 @@ fun ListScreen(
     onItemClicked: (movieId: Int) -> Unit) {
 
     val listItems = flow.collectAsLazyPagingItems()
-
-    //This workaround allows us to handle configuration changes without being spanned to the top
-    //https://issuetracker.google.com/issues/177245496
-    val refresh = listItems.loadState.refresh
-    if (listItems.itemCount == 0 && refresh is LoadState.NotLoading ) return //skip dummy state, waiting next compose
+    val scope = rememberCoroutineScope()
 
     TopAppBarWithSearch(onSearch = { searchString ->
         onSearch(searchString)
         listItems.refresh()
-        //TODO reset scroll position to top
+        scope.launch {
+            state.animateScrollToItem(0, 0)
+        }
     }) { paddingValues ->
         MovieListView(
             state = state,
@@ -122,6 +126,21 @@ fun CustomSearchView(modifier: Modifier = Modifier, onSearch: (String) -> (Unit)
         onValueChange = onValueChange,
         textStyle = TextStyle(fontSize = 17.sp),
         leadingIcon = { Icon(Icons.Filled.Search, null, tint = Color.Gray) },
+        trailingIcon = {
+            Icon(Icons.Filled.Clear,
+                "Clear",
+                tint = Color.Gray,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(32.dp))
+                    .clickable {
+                        if (value.isNotBlank()) {
+                            onValueChange("")
+                            onSearch("")
+                        }
+                    }
+                    .padding(4.dp)
+            )
+        },
         modifier = modifier
             .padding(10.dp)
             .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(32.dp)),
@@ -139,7 +158,6 @@ fun CustomSearchView(modifier: Modifier = Modifier, onSearch: (String) -> (Unit)
         keyboardActions = KeyboardActions(
             onSearch = { onSearch(value) }
         )
-        //TODO Add clear button
     )
 }
 
@@ -149,6 +167,8 @@ fun SearchPreview() {
     CustomSearchView {}
 }
 
+private val hasNoMovies: MutableState<Boolean> = mutableStateOf(true)
+
 @Composable
 fun MovieListView(
     state: LazyListState,
@@ -157,31 +177,49 @@ fun MovieListView(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues
 ) {
-    LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        state = state,
-        modifier = modifier.statusBarsPadding()
-    ) {
 
-        item {
-            Spacer(modifier.padding(top = paddingValues.calculateTopPadding() - 24.dp))
+    hasNoMovies.value =
+        (listItems.loadState.append.endOfPaginationReached && listItems.itemCount == 0)
+
+    if (hasNoMovies.value) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxSize().size(400.dp)
+        ) {
+            Text(
+                text = stringResource(id = R.string.search_no_movies),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(8.dp)
+            )
         }
-        items(
-            count = listItems.itemCount,
-            key = listItems.itemKey(key = { movie -> movie.id }),
-            contentType = listItems.itemContentType()
-        ) { index ->
-            listItems[index]?.let { movie ->
-                MovieListItem(movie = movie) {
-                    onItemClicked(movie.id)
+    } else {
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            state = state,
+            modifier = modifier.statusBarsPadding()
+        ) {
+
+            item {
+                Spacer(modifier.padding(top = paddingValues.calculateTopPadding() - 24.dp))
+            }
+            items(
+                count = listItems.itemCount,
+                key = listItems.itemKey(key = { movie -> movie.id }),
+                contentType = listItems.itemContentType()
+            ) { index ->
+                listItems[index]?.let { movie ->
+                    MovieListItem(movie = movie) {
+                        onItemClicked(movie.id)
+                    }
                 }
             }
-        }
 
-        item {
-            LoadStateView(
-                loadState = listItems.loadState, movieCount = listItems.itemCount
-            ) { listItems.retry() }
+            item {
+                LoadStateView(
+                    loadState = listItems.loadState, movieCount = listItems.itemCount
+                ) { listItems.retry() }
+            }
         }
     }
 }

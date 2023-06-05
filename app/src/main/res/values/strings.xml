@@ -14,4 +14,5 @@
     <string name="data_from_tmdb">All movie data provided by The Movie Database (TMDB) themoviedb.org</string>
     <string name="tmdb_url">https://www.themoviedb.org/</string>
     <string name="trailers">Trailers</string>
+    <string name="search_no_movies">No movies found matching your search</string>
 </resources>
