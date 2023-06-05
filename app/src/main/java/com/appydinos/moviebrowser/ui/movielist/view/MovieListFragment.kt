@@ -38,7 +38,9 @@ class MovieListFragment : Fragment() {
         val listView = binding.listContent
         listView.setContent {
             MovieBrowserTheme(windows = null) {
-                ListScreen(viewModel.lazyListState, viewModel.pagingData) { movieId ->
+                ListScreen(state = viewModel.lazyListState, flow = viewModel.pagingData, onSearch = {
+                    viewModel.search(it)
+                }) { movieId ->
                     openDetails(movieId, binding = binding)
                 }
             }

@@ -1,5 +1,6 @@
 package com.appydinos.moviebrowser.data.repo
 
+import androidx.compose.runtime.MutableState
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
@@ -15,6 +16,10 @@ class MoviesRepository @Inject constructor(
 
     override fun getNowPlayingMovies(pageSize: Int): Flow<PagingData<Movie>> {
         return Pager(PagingConfig(pageSize)) { MoviePagingSource(api, null) }.flow
+    }
+
+    override fun searchNowPlayingMovies(pageSize: Int, searchQuery: MutableState<String>?): Flow<PagingData<Movie>> {
+        return Pager(PagingConfig(pageSize)) { MoviePagingSource(api, searchQuery) }.flow
     }
 
     @Throws

@@ -22,11 +22,8 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -59,11 +56,11 @@ import com.appydinos.moviebrowser.ui.compose.components.RatingIcon
 import kotlinx.coroutines.flow.Flow
 import timber.log.Timber
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListScreen(
     state: LazyListState,
     flow: Flow<PagingData<Movie>>,
+    onSearch: (String) -> Unit,
     onItemClicked: (movieId: Int) -> Unit) {
 
     val listItems = flow.collectAsLazyPagingItems()
@@ -73,7 +70,11 @@ fun ListScreen(
     val refresh = listItems.loadState.refresh
     if (listItems.itemCount == 0 && refresh is LoadState.NotLoading ) return //skip dummy state, waiting next compose
 
-    TopAppBarWithSearch { paddingValues ->
+    TopAppBarWithSearch(onSearch = { searchString ->
+        onSearch(searchString)
+        listItems.refresh()
+        //TODO reset scroll position to top
+    }) { paddingValues ->
         MovieListView(
             state = state,
             listItems = listItems,
@@ -86,9 +87,7 @@ fun ListScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopAppBarWithSearch(screenContent: @Composable (PaddingValues) -> Unit) {
-    var text by rememberSaveable { mutableStateOf("") }
-    var active by rememberSaveable { mutableStateOf(false) }
+fun TopAppBarWithSearch(onSearch: (String) -> Unit, screenContent: @Composable (PaddingValues) -> Unit) {
     val scrollBehaviors = TopAppBarDefaults.enterAlwaysScrollBehavior()
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehaviors.nestedScrollConnection),
@@ -97,6 +96,7 @@ fun TopAppBarWithSearch(screenContent: @Composable (PaddingValues) -> Unit) {
                 title = {
                     CustomSearchView(modifier = Modifier.fillMaxWidth()) { searchString ->
                         Timber.v("Searching for $searchString")
+                        onSearch(searchString)
                     }
                 },
                 scrollBehavior = scrollBehaviors,
@@ -115,7 +115,7 @@ fun TopAppBarWithSearch(screenContent: @Composable (PaddingValues) -> Unit) {
 
 @Composable
 fun CustomSearchView(modifier: Modifier = Modifier, onSearch: (String) -> (Unit)) {
-    val (value, onValueChange) = remember { mutableStateOf("") }
+    val (value, onValueChange) = rememberSaveable { mutableStateOf("") }
 
     TextField(
         value = value,
@@ -139,6 +139,7 @@ fun CustomSearchView(modifier: Modifier = Modifier, onSearch: (String) -> (Unit)
         keyboardActions = KeyboardActions(
             onSearch = { onSearch(value) }
         )
+        //TODO Add clear button
     )
 }
 

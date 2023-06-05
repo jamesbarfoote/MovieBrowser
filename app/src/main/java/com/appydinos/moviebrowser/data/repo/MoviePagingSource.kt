@@ -1,5 +1,6 @@
 package com.appydinos.moviebrowser.data.repo
 
+import androidx.compose.runtime.MutableState
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.appydinos.moviebrowser.data.model.Movie
@@ -9,14 +10,14 @@ import retrofit2.HttpException
 import timber.log.Timber
 import java.io.IOException
 
-class MoviePagingSource(private val backendService: MovieService, private val query: String?): PagingSource<Int, Movie>() {
+class MoviePagingSource(private val backendService: MovieService, private val query: MutableState<String>?): PagingSource<Int, Movie>() {
 
     override suspend fun load(
         params: LoadParams<Int>
     ): LoadResult<Int, Movie> {
         return try {
             val nextPageNumber = params.key ?: 1
-            val response = backendService.getLatestMovies(nextPageNumber)
+            val response = if (query?.value.isNullOrBlank()) backendService.getLatestMovies(nextPageNumber) else backendService.searchMovies(nextPageNumber, query?.value)
             if (response.isSuccessful) {
                 val data = response.body()
                 LoadResult.Page(
