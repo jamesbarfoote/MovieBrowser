@@ -1,38 +1,47 @@
 package com.appydinos.moviebrowser.ui.movielist.view
 
 import android.content.res.Configuration
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.SearchBar
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.semantics.isTraversalGroup
-import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction.Companion.Search
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.paging.LoadState
 import androidx.paging.PagingData
@@ -48,6 +57,7 @@ import com.appydinos.moviebrowser.ui.compose.components.FooterView
 import com.appydinos.moviebrowser.ui.compose.components.LoadStateView
 import com.appydinos.moviebrowser.ui.compose.components.RatingIcon
 import kotlinx.coroutines.flow.Flow
+import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,54 +73,106 @@ fun ListScreen(
     val refresh = listItems.loadState.refresh
     if (listItems.itemCount == 0 && refresh is LoadState.NotLoading ) return //skip dummy state, waiting next compose
 
-    var text by rememberSaveable { mutableStateOf("") }
-    var active by rememberSaveable { mutableStateOf(false) }
-
-    Box(Modifier.fillMaxSize()) {
-        // Talkback focus order sorts based on x and y position before considering z-index. The
-        // extra Box with semantics and fillMaxWidth is a workaround to get the search bar to focus
-        // before the content.
-        Box(Modifier.semantics { isTraversalGroup = true }.zIndex(1f).fillMaxWidth()) {
-            SearchBar(
-                modifier = Modifier.align(Alignment.TopCenter),
-                query = text,
-                onQueryChange = { text = it },
-                onSearch = { active = false },
-                active = active,
-                onActiveChange = {
-                    active = it
-                },
-                placeholder = { Text("Hinted search text") },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                trailingIcon = { Icon(Icons.Default.MoreVert, contentDescription = null) },
-            ) {
-
-            }
-        }
+    TopAppBarWithSearch { paddingValues ->
         MovieListView(
             state = state,
             listItems = listItems,
-            onItemClicked = { onItemClicked(it) })
+            onItemClicked = { onItemClicked(it) },
+            paddingValues = paddingValues,
+            modifier = Modifier
+        )
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MovieListView(state: LazyListState, listItems: LazyPagingItems<Movie>, onItemClicked: (movieId: Int) -> Unit) {
+fun TopAppBarWithSearch(screenContent: @Composable (PaddingValues) -> Unit) {
+    var text by rememberSaveable { mutableStateOf("") }
+    var active by rememberSaveable { mutableStateOf(false) }
+    val scrollBehaviors = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehaviors.nestedScrollConnection),
+        topBar = {
+            TopAppBar(
+                title = {
+                    CustomSearchView(modifier = Modifier.fillMaxWidth()) { searchString ->
+                        Timber.v("Searching for $searchString")
+                    }
+                },
+                scrollBehavior = scrollBehaviors,
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                    titleContentColor = Color.Transparent,
+                    scrolledContainerColor = Color.Transparent
+                ),
+            )
+        },
+        content = { innerPadding ->
+            screenContent(innerPadding)
+        }
+    )
+}
+
+@Composable
+fun CustomSearchView(modifier: Modifier = Modifier, onSearch: (String) -> (Unit)) {
+    val (value, onValueChange) = remember { mutableStateOf("") }
+
+    TextField(
+        value = value,
+        onValueChange = onValueChange,
+        textStyle = TextStyle(fontSize = 17.sp),
+        leadingIcon = { Icon(Icons.Filled.Search, null, tint = Color.Gray) },
+        modifier = modifier
+            .padding(10.dp)
+            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(32.dp)),
+        placeholder = { Text(text = "Search...") },
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = Color.Transparent,
+            unfocusedContainerColor = Color.Transparent,
+            disabledContainerColor = Color.Transparent,
+            cursorColor = Color.DarkGray,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+        ),
+        maxLines = 1,
+        keyboardOptions = KeyboardOptions(imeAction = Search),
+        keyboardActions = KeyboardActions(
+            onSearch = { onSearch(value) }
+        )
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SearchPreview() {
+    CustomSearchView {}
+}
+
+@Composable
+fun MovieListView(
+    state: LazyListState,
+    listItems: LazyPagingItems<Movie>,
+    onItemClicked: (movieId: Int) -> Unit,
+    modifier: Modifier = Modifier,
+    paddingValues: PaddingValues
+) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         state = state,
-        modifier = Modifier.statusBarsPadding()
+        modifier = modifier.statusBarsPadding()
     ) {
 
+        item {
+            Spacer(modifier.padding(top = paddingValues.calculateTopPadding() - 24.dp))
+        }
         items(
             count = listItems.itemCount,
             key = listItems.itemKey(key = { movie -> movie.id }),
             contentType = listItems.itemContentType()
         ) { index ->
-            val item = listItems[index]
-            if (item != null) {
-                MovieListItem(movie = item) {
-                    onItemClicked(item.id)
+            listItems[index]?.let { movie ->
+                MovieListItem(movie = movie) {
+                    onItemClicked(movie.id)
                 }
             }
         }
