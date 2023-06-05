@@ -1,5 +1,6 @@
 package com.appydinos.moviebrowser.ui.movielist.viewmodel
 
+import androidx.compose.runtime.MutableState
 import androidx.paging.PagingData
 import com.appydinos.moviebrowser.data.model.Movie
 import com.appydinos.moviebrowser.data.model.freeGuyMovieList
@@ -16,9 +17,12 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
+import org.mockito.Captor
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
+import org.mockito.Mockito.eq
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.junit.MockitoJUnitRunner
 
@@ -29,6 +33,9 @@ class MovieListViewModelUnitTest {
     @Mock
     lateinit var repo: MoviesRepository
 
+    @Captor
+    private lateinit var queryCaptor: ArgumentCaptor<MutableState<String>>
+
     private lateinit var viewModel: MovieListViewModel
     private val testDispatcher = StandardTestDispatcher()
 
@@ -36,7 +43,7 @@ class MovieListViewModelUnitTest {
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         MockitoAnnotations.openMocks(this)
-        `when`(repo.getNowPlayingMovies(30)).thenReturn(flowOf(PagingData.from(
+        `when`(repo.getMovies(eq(30), queryCaptor.capture())).thenReturn(flowOf(PagingData.from(
             listOf(freeGuyMovieList))))
         viewModel = MovieListViewModel(repo)
     }
@@ -54,7 +61,23 @@ class MovieListViewModelUnitTest {
 
         //Then
         advanceUntilIdle()
-        verify(repo).getNowPlayingMovies(30)
+        verify(repo).getMovies(eq(30), queryCaptor.capture())
+        assertEquals("", queryCaptor.value.value)
+    }
+
+    @Test
+    fun `getMoviesList - makes call to get movies with query`() = runTest {
+        ///Given
+        viewModel.search("Some string")
+
+        //When
+        MutableStateFlow<List<Movie>>(listOf())
+            .flatMapLatest { viewModel.pagingData }
+
+        //Then
+        advanceUntilIdle()
+        verify(repo).getMovies(eq(30), queryCaptor.capture())
+        assertEquals("Some string", queryCaptor.value.value)
     }
 
     @Test

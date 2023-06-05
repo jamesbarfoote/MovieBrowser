@@ -16,7 +16,7 @@ class MovieListViewModel @Inject constructor(private val moviesRepository: Movie
         searchQuery.value = searchString
     }
 
-    var pagingData = moviesRepository.searchNowPlayingMovies(30, searchQuery)
+    var pagingData = moviesRepository.getMovies(30, searchQuery)
         .cachedIn(viewModelScope)
 
     val lazyListState: LazyListState = LazyListState()

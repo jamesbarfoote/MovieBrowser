@@ -7,9 +7,7 @@ import com.appydinos.moviebrowser.data.model.Video
 import kotlinx.coroutines.flow.Flow
 
 interface IMoviesRepository {
-    fun getNowPlayingMovies(pageSize: Int): Flow<PagingData<Movie>>
-
-    fun searchNowPlayingMovies(pageSize: Int, searchQuery: MutableState<String>?): Flow<PagingData<Movie>>
+    fun getMovies(pageSize: Int, searchQuery: MutableState<String>?): Flow<PagingData<Movie>>
 
     suspend fun getMovieDetails(movieId: Int): Movie?
 

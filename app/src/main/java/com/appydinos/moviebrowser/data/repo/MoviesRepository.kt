@@ -14,11 +14,7 @@ import javax.inject.Inject
 class MoviesRepository @Inject constructor(
     private val api: MovieService): IMoviesRepository {
 
-    override fun getNowPlayingMovies(pageSize: Int): Flow<PagingData<Movie>> {
-        return Pager(PagingConfig(pageSize)) { MoviePagingSource(api, null) }.flow
-    }
-
-    override fun searchNowPlayingMovies(pageSize: Int, searchQuery: MutableState<String>?): Flow<PagingData<Movie>> {
+    override fun getMovies(pageSize: Int, searchQuery: MutableState<String>?): Flow<PagingData<Movie>> {
         return Pager(PagingConfig(pageSize)) { MoviePagingSource(api, searchQuery) }.flow
     }
 
